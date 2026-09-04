@@ -1,0 +1,241 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://unpkg.com/@pptxlint/core@0.1.1-beta.0/dist/schemas/pptxlint.schema.json",
+  "title": "pptxlint configuration",
+  "type": "object",
+  "additionalProperties": false,
+  "properties": {
+    "$schema": { "type": "string" },
+    "schemaVersion": { "const": 1 },
+    "extends": {
+      "type": "array",
+      "items": { "const": "recommended" },
+      "uniqueItems": true
+    },
+    "failOn": { "enum": ["warning", "error"] },
+    "ignore": {
+      "type": "array",
+      "items": { "$ref": "#/$defs/suppression" }
+    },
+    "rules": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "package/broken-relationship": { "$ref": "#/$defs/packageRule" },
+        "package/malformed-xml": { "$ref": "#/$defs/packageRule" },
+        "package/missing-media": { "$ref": "#/$defs/packageRule" },
+        "layout/outside-slide": { "$ref": "#/$defs/outsideSlideRule" },
+        "layout/text-overlap": { "$ref": "#/$defs/textOverlapRule" },
+        "layout/text-occluded": { "$ref": "#/$defs/textOccludedRule" },
+        "text/min-font-size": { "$ref": "#/$defs/minimumFontRule" },
+        "text/autofit-scale-below-minimum": {
+          "$ref": "#/$defs/minimumFontRule"
+        },
+        "text/autofit-enabled": { "$ref": "#/$defs/packageRule" },
+        "fonts/allowed": { "$ref": "#/$defs/allowedFontsRule" }
+      }
+    }
+  },
+  "$defs": {
+    "ruleId": {
+      "enum": [
+        "package/broken-relationship",
+        "package/missing-media",
+        "package/malformed-xml",
+        "layout/outside-slide",
+        "layout/text-overlap",
+        "layout/text-occluded",
+        "text/min-font-size",
+        "text/autofit-scale-below-minimum",
+        "text/autofit-enabled",
+        "fonts/allowed"
+      ]
+    },
+    "suppression": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["rule"],
+      "properties": {
+        "rule": { "$ref": "#/$defs/ruleId" },
+        "file": {
+          "type": "string",
+          "minLength": 1,
+          "description": "Raw logical path relative to the working directory; .. may select an external input. Use / as the portable separator; input-key escaping is applied automatically."
+        },
+        "slide": { "type": "integer", "minimum": 1 },
+        "slideId": { "type": "string", "minLength": 1 },
+        "shapeIds": {
+          "type": "array",
+          "items": { "type": "integer", "minimum": 0 },
+          "minItems": 1,
+          "uniqueItems": true
+        },
+        "part": { "type": "string", "minLength": 1 },
+        "reason": { "type": "string", "minLength": 1 }
+      },
+      "anyOf": [
+        { "required": ["file"] },
+        { "required": ["slide"] },
+        { "required": ["slideId"] },
+        { "required": ["shapeIds"] },
+        { "required": ["part"] }
+      ]
+    },
+    "severity": { "enum": ["off", "warning", "error"] },
+    "packageRule": {
+      "oneOf": [
+        { "$ref": "#/$defs/severity" },
+        {
+          "type": "array",
+          "prefixItems": [
+            { "$ref": "#/$defs/severity" },
+            { "type": "object", "additionalProperties": false }
+          ],
+          "minItems": 1,
+          "maxItems": 2
+        }
+      ]
+    },
+    "outsideSlideRule": {
+      "oneOf": [
+        { "$ref": "#/$defs/severity" },
+        {
+          "type": "array",
+          "prefixItems": [
+            { "$ref": "#/$defs/severity" },
+            {
+              "type": "object",
+              "additionalProperties": false,
+              "properties": {
+                "tolerancePt": {
+                  "type": "number",
+                  "minimum": 0,
+                  "maximum": 10000
+                },
+                "minOutsideRatio": {
+                  "type": "number",
+                  "minimum": 0,
+                  "maximum": 1
+                }
+              }
+            }
+          ],
+          "minItems": 1,
+          "maxItems": 2
+        }
+      ]
+    },
+    "textOverlapRule": {
+      "oneOf": [
+        { "$ref": "#/$defs/severity" },
+        {
+          "type": "array",
+          "prefixItems": [
+            { "$ref": "#/$defs/severity" },
+            {
+              "type": "object",
+              "additionalProperties": false,
+              "properties": {
+                "minOverlapRatio": {
+                  "type": "number",
+                  "minimum": 0,
+                  "maximum": 1
+                }
+              }
+            }
+          ],
+          "minItems": 1,
+          "maxItems": 2
+        }
+      ]
+    },
+    "textOccludedRule": {
+      "oneOf": [
+        { "$ref": "#/$defs/severity" },
+        {
+          "type": "array",
+          "prefixItems": [
+            { "$ref": "#/$defs/severity" },
+            {
+              "type": "object",
+              "additionalProperties": false,
+              "properties": {
+                "minOccludedRatio": {
+                  "type": "number",
+                  "minimum": 0,
+                  "maximum": 1
+                }
+              }
+            }
+          ],
+          "minItems": 1,
+          "maxItems": 2
+        }
+      ]
+    },
+    "minimumFontRule": {
+      "oneOf": [
+        { "$ref": "#/$defs/severity" },
+        {
+          "type": "array",
+          "prefixItems": [
+            { "$ref": "#/$defs/severity" },
+            {
+              "type": "object",
+              "additionalProperties": false,
+              "properties": {
+                "defaultPt": {
+                  "type": "number",
+                  "minimum": 1,
+                  "maximum": 4000
+                },
+                "titlePt": {
+                  "type": "number",
+                  "minimum": 1,
+                  "maximum": 4000
+                }
+              }
+            }
+          ],
+          "minItems": 1,
+          "maxItems": 2
+        }
+      ]
+    },
+    "allowedFontsRule": {
+      "oneOf": [
+        { "const": "off" },
+        {
+          "type": "array",
+          "prefixItems": [{ "const": "off" }],
+          "minItems": 1,
+          "maxItems": 1
+        },
+        {
+          "type": "array",
+          "prefixItems": [
+            { "$ref": "#/$defs/severity" },
+            {
+              "type": "object",
+              "additionalProperties": false,
+              "required": ["families"],
+              "properties": {
+                "families": {
+                  "type": "array",
+                  "items": { "type": "string", "minLength": 1 },
+                  "minItems": 1,
+                  "uniqueItems": true
+                },
+                "unresolved": {
+                  "enum": ["ignore", "warning", "error"]
+                }
+              }
+            }
+          ],
+          "minItems": 2,
+          "maxItems": 2
+        }
+      ]
+    }
+  }
+}

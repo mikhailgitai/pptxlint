@@ -1,0 +1,40 @@
+{
+  "name": "pptxlint-workspace",
+  "version": "0.1.1-beta.0",
+  "private": true,
+  "license": "Apache-2.0",
+  "author": "Mikhail Grankin",
+  "type": "module",
+  "packageManager": "pnpm@10.24.0",
+  "engines": {
+    "node": "^22.13.0 || ^24.0.0",
+    "pnpm": ">=10.24.0 <11"
+  },
+  "scripts": {
+    "build": "tsc -b && node scripts/copy-package-assets.mjs",
+    "benchmark": "pnpm build && node benchmarks/run.mjs",
+    "clean": "tsc -b --clean",
+    "example:build": "node scripts/build-public-example.mjs",
+    "format": "prettier --write .",
+    "format:check": "prettier --check .",
+    "lint": "eslint .",
+    "pptxlint": "node packages/cli/dist/cli.js",
+    "test": "vitest run --config vitest.config.ts",
+    "test:integration": "pnpm build && vitest run --config vitest.integration.config.ts",
+    "test:example": "pnpm build && node scripts/verify-public-example.mjs",
+    "test:package": "pnpm build && node tests/package/packed-cli.test.mjs",
+    "typecheck": "tsc --noEmit --project tsconfig.typecheck.json"
+  },
+  "devDependencies": {
+    "@eslint/js": "10.0.1",
+    "@types/node": "22.20.1",
+    "ajv": "catalog:",
+    "ajv-draft-04": "catalog:",
+    "ajv-formats": "catalog:",
+    "eslint": "10.9.1",
+    "prettier": "3.9.6",
+    "typescript": "6.0.3",
+    "typescript-eslint": "8.68.0",
+    "vitest": "4.1.11"
+  }
+}

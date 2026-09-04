@@ -1,0 +1,57 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://unpkg.com/@pptxlint/core@0.1.1-beta.0/dist/schemas/pptxlint-baseline.schema.json",
+  "title": "pptxlint baseline",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schemaVersion", "toolMajorVersion", "inputs"],
+  "properties": {
+    "schemaVersion": { "const": 3 },
+    "toolMajorVersion": { "const": 0 },
+    "inputs": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["inputKey", "findings"],
+        "properties": {
+          "inputKey": { "type": "string", "minLength": 1 },
+          "findings": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": ["fingerprint", "ruleId", "location"],
+              "properties": {
+                "fingerprint": {
+                  "type": "string",
+                  "pattern": "^[a-f0-9]{64}$"
+                },
+                "ruleId": {
+                  "$ref": "https://unpkg.com/@pptxlint/core@0.1.1-beta.0/dist/schemas/pptxlint.schema.json#/$defs/ruleId"
+                },
+                "location": {
+                  "type": "object",
+                  "additionalProperties": false,
+                  "properties": {
+                    "part": { "type": "string", "minLength": 1 },
+                    "slideNumber": { "type": "integer", "minimum": 1 },
+                    "slideId": { "type": "string", "minLength": 1 },
+                    "shapeIds": {
+                      "type": "array",
+                      "items": { "type": "integer", "minimum": 0 },
+                      "minItems": 1,
+                      "uniqueItems": true
+                    },
+                    "paragraphIndex": { "type": "integer", "minimum": 0 },
+                    "runIndex": { "type": "integer", "minimum": 0 }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}

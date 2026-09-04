@@ -1,0 +1,417 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`CLI workspace skeleton > emits deterministic multi-file SARIF with rules, artifacts, and logical locations 1`] = `
+"{
+  "version": "2.1.0",
+  "$schema": "https://docs.oasis-open.org/sarif/sarif/v2.1.0/errata01/os/schemas/sarif-schema-2.1.0.json",
+  "runs": [
+    {
+      "tool": {
+        "driver": {
+          "name": "pptxlint",
+          "version": "0.1.1-beta.0",
+          "semanticVersion": "0.1.1-beta.0",
+          "rules": [
+            {
+              "id": "package/broken-relationship",
+              "shortDescription": {
+                "text": "Internal non-media relationship target is missing."
+              },
+              "defaultConfiguration": {
+                "enabled": true,
+                "level": "error"
+              },
+              "properties": {
+                "prerequisites": [
+                  "relationships"
+                ]
+              }
+            },
+            {
+              "id": "package/missing-media",
+              "shortDescription": {
+                "text": "Media relationship target is missing."
+              },
+              "defaultConfiguration": {
+                "enabled": true,
+                "level": "error"
+              },
+              "properties": {
+                "prerequisites": [
+                  "relationships"
+                ]
+              }
+            },
+            {
+              "id": "package/malformed-xml",
+              "shortDescription": {
+                "text": "Package XML part is not well-formed."
+              },
+              "defaultConfiguration": {
+                "enabled": true,
+                "level": "error"
+              },
+              "properties": {
+                "prerequisites": [
+                  "archive",
+                  "xml"
+                ]
+              }
+            },
+            {
+              "id": "layout/outside-slide",
+              "shortDescription": {
+                "text": "Shape extends beyond the slide boundary."
+              },
+              "defaultConfiguration": {
+                "enabled": true,
+                "level": "warning"
+              },
+              "properties": {
+                "prerequisites": [
+                  "presentation"
+                ]
+              }
+            },
+            {
+              "id": "layout/text-overlap",
+              "shortDescription": {
+                "text": "Text-bearing shapes overlap."
+              },
+              "defaultConfiguration": {
+                "enabled": true,
+                "level": "warning"
+              },
+              "properties": {
+                "prerequisites": [
+                  "presentation"
+                ]
+              }
+            },
+            {
+              "id": "layout/text-occluded",
+              "shortDescription": {
+                "text": "Text is occluded by a later opaque shape."
+              },
+              "defaultConfiguration": {
+                "enabled": false,
+                "level": "none"
+              },
+              "properties": {
+                "prerequisites": [
+                  "presentation",
+                  "relationships",
+                  "archive"
+                ]
+              }
+            },
+            {
+              "id": "text/min-font-size",
+              "shortDescription": {
+                "text": "Effective font size is below the configured minimum."
+              },
+              "defaultConfiguration": {
+                "enabled": true,
+                "level": "error"
+              },
+              "properties": {
+                "prerequisites": [
+                  "text"
+                ]
+              }
+            },
+            {
+              "id": "text/autofit-scale-below-minimum",
+              "shortDescription": {
+                "text": "Stored autofit scale reduces effective font size below the configured minimum."
+              },
+              "defaultConfiguration": {
+                "enabled": true,
+                "level": "error"
+              },
+              "properties": {
+                "prerequisites": [
+                  "text"
+                ]
+              }
+            },
+            {
+              "id": "text/autofit-enabled",
+              "shortDescription": {
+                "text": "Runtime autofit is enabled without a persisted scale."
+              },
+              "defaultConfiguration": {
+                "enabled": true,
+                "level": "warning"
+              },
+              "properties": {
+                "prerequisites": [
+                  "text"
+                ]
+              }
+            },
+            {
+              "id": "fonts/allowed",
+              "shortDescription": {
+                "text": "Resolved font is not in the configured allowlist."
+              },
+              "defaultConfiguration": {
+                "enabled": false,
+                "level": "none"
+              },
+              "properties": {
+                "prerequisites": [
+                  "text"
+                ]
+              }
+            }
+          ]
+        }
+      },
+      "artifacts": [
+        {
+          "location": {
+            "uri": "a%20missing%23.pptx",
+            "uriBaseId": "%SRCROOT%",
+            "index": 0
+          },
+          "roles": [
+            "analysisTarget"
+          ],
+          "mimeType": "application/vnd.openxmlformats-officedocument.presentationml.presentation",
+          "hashes": {
+            "sha-256": "d90e36e6f62e19b56caedf3f766f51c26c2b903d57fa96c412dc66017f8155da"
+          },
+          "properties": {
+            "pptxlintInputKey": "a missing#.pptx",
+            "pptxlintDisplayPath": "a missing#.pptx",
+            "pptxlintAnalysisComplete": true,
+            "pptxlintSkippedRules": []
+          }
+        },
+        {
+          "location": {
+            "uri": "z-valid.pptx",
+            "uriBaseId": "%SRCROOT%",
+            "index": 1
+          },
+          "roles": [
+            "analysisTarget"
+          ],
+          "mimeType": "application/vnd.openxmlformats-officedocument.presentationml.presentation",
+          "hashes": {
+            "sha-256": "b4c0cdb1a0d7643eabe9ff74154e4c70b9f1503312b945b05efd89ed894daba0"
+          },
+          "properties": {
+            "pptxlintInputKey": "z-valid.pptx",
+            "pptxlintDisplayPath": "z-valid.pptx",
+            "pptxlintAnalysisComplete": true,
+            "pptxlintSkippedRules": []
+          }
+        }
+      ],
+      "results": [
+        {
+          "ruleId": "package/missing-media",
+          "ruleIndex": 1,
+          "kind": "fail",
+          "level": "error",
+          "message": {
+            "text": "Referenced image target \\"../media/missing.png\\" is missing."
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "a%20missing%23.pptx",
+                  "uriBaseId": "%SRCROOT%",
+                  "index": 0
+                }
+              },
+              "logicalLocations": [
+                {
+                  "name": "slide 1",
+                  "fullyQualifiedName": "a missing#.pptx#part=ppt/slides/slide1.xml;slide=1;slideId=256",
+                  "kind": "element",
+                  "properties": {
+                    "part": "ppt/slides/slide1.xml",
+                    "slideNumber": 1,
+                    "slideId": "256"
+                  }
+                }
+              ],
+              "properties": {
+                "part": "ppt/slides/slide1.xml",
+                "slideNumber": 1,
+                "slideId": "256"
+              }
+            }
+          ],
+          "partialFingerprints": {
+            "pptxlintFingerprint/v1": "a6b49fc2f36c485cd1e763b9bfce908423d6a87720fafe6cae0eaa7000a55051"
+          },
+          "properties": {
+            "pptxlintStatus": "new",
+            "pptxlintInputKey": "a missing#.pptx",
+            "part": "ppt/slides/slide1.xml",
+            "slideNumber": 1,
+            "slideId": "256",
+            "pptxlintEvidence": {
+              "mediaKind": "image",
+              "rawTarget": "../media/missing.png",
+              "referencingSlide": 1,
+              "relationshipId": "rId8",
+              "relationshipPart": "ppt/slides/_rels/slide1.xml.rels",
+              "relationshipType": "http://schemas.openxmlformats.org/officeDocument/2006/relationships/image",
+              "resolvedTarget": "ppt/media/missing.png",
+              "sourcePart": "ppt/slides/slide1.xml"
+            }
+          }
+        }
+      ],
+      "properties": {
+        "pptxlintReportSchemaVersion": 1,
+        "pptxlintConfigHash": "fc9f57e76658b4c848f6b36e02ec638b50b478f86e127aebdcb6ba6b269c8eb2",
+        "pptxlintAnalysisComplete": true,
+        "pptxlintSummary": {
+          "errors": 1,
+          "warnings": 0,
+          "total": 1,
+          "new": {
+            "errors": 1,
+            "warnings": 0,
+            "total": 1
+          },
+          "existing": {
+            "errors": 0,
+            "warnings": 0,
+            "total": 0
+          },
+          "resolved": 0,
+          "suppressed": 0
+        },
+        "pptxlintTimingsMs": {}
+      }
+    }
+  ]
+}
+"
+`;
+
+exports[`CLI workspace skeleton > emits one deterministic multi-file JSON report that matches its schema 1`] = `
+"{
+  "schemaVersion": 1,
+  "toolVersion": "0.1.1-beta.0",
+  "configHash": "fc9f57e76658b4c848f6b36e02ec638b50b478f86e127aebdcb6ba6b269c8eb2",
+  "analysisComplete": true,
+  "inputs": [
+    {
+      "schemaVersion": 1,
+      "input": {
+        "file": "a-missing.pptx",
+        "inputKey": "a-missing.pptx",
+        "sourceSha256": "d90e36e6f62e19b56caedf3f766f51c26c2b903d57fa96c412dc66017f8155da"
+      },
+      "findings": [
+        {
+          "ruleId": "package/missing-media",
+          "severity": "error",
+          "status": "new",
+          "message": "Referenced image target \\"../media/missing.png\\" is missing.",
+          "file": "a-missing.pptx",
+          "location": {
+            "part": "ppt/slides/slide1.xml",
+            "slideNumber": 1,
+            "slideId": "256"
+          },
+          "evidence": {
+            "mediaKind": "image",
+            "rawTarget": "../media/missing.png",
+            "referencingSlide": 1,
+            "relationshipId": "rId8",
+            "relationshipPart": "ppt/slides/_rels/slide1.xml.rels",
+            "relationshipType": "http://schemas.openxmlformats.org/officeDocument/2006/relationships/image",
+            "resolvedTarget": "ppt/media/missing.png",
+            "sourcePart": "ppt/slides/slide1.xml"
+          },
+          "fingerprint": "9ac42bb2873105f8c1ba2302ab9add9cdecf9f3a41207a725eb1aa32f5f52795"
+        }
+      ],
+      "suppressedFindings": [],
+      "unusedSuppressions": [],
+      "resolvedFindings": [],
+      "diagnostics": [],
+      "skippedRules": [],
+      "analysisComplete": true,
+      "summary": {
+        "errors": 1,
+        "warnings": 0,
+        "total": 1,
+        "new": {
+          "errors": 1,
+          "warnings": 0,
+          "total": 1
+        },
+        "existing": {
+          "errors": 0,
+          "warnings": 0,
+          "total": 0
+        },
+        "resolved": 0,
+        "suppressed": 0
+      }
+    },
+    {
+      "schemaVersion": 1,
+      "input": {
+        "file": "z-valid.pptx",
+        "inputKey": "z-valid.pptx",
+        "sourceSha256": "b4c0cdb1a0d7643eabe9ff74154e4c70b9f1503312b945b05efd89ed894daba0"
+      },
+      "findings": [],
+      "suppressedFindings": [],
+      "unusedSuppressions": [],
+      "resolvedFindings": [],
+      "diagnostics": [],
+      "skippedRules": [],
+      "analysisComplete": true,
+      "summary": {
+        "errors": 0,
+        "warnings": 0,
+        "total": 0,
+        "new": {
+          "errors": 0,
+          "warnings": 0,
+          "total": 0
+        },
+        "existing": {
+          "errors": 0,
+          "warnings": 0,
+          "total": 0
+        },
+        "resolved": 0,
+        "suppressed": 0
+      }
+    }
+  ],
+  "summary": {
+    "errors": 1,
+    "warnings": 0,
+    "total": 1,
+    "new": {
+      "errors": 1,
+      "warnings": 0,
+      "total": 1
+    },
+    "existing": {
+      "errors": 0,
+      "warnings": 0,
+      "total": 0
+    },
+    "resolved": 0,
+    "suppressed": 0
+  },
+  "timingsMs": {}
+}
+"
+`;

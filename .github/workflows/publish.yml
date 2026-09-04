@@ -1,0 +1,143 @@
+name: Publish stable release
+
+on:
+  push:
+    tags:
+      - "v*.*.*"
+
+permissions:
+  contents: read
+
+concurrency:
+  group: npm-publish-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  verify:
+    name: Verify release artifacts
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+
+    steps:
+      - name: Check out exact tag
+        uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 # v5
+
+      - name: Set up pinned pnpm
+        uses: pnpm/action-setup@b906affcce14559ad1aafd4ab0e942779e9f58b1 # v4
+        with:
+          version: 10.24.0
+          run_install: false
+
+      - name: Set up Node.js 24
+        uses: actions/setup-node@249970729cb0ef3589644e2896645e5dc5ba9c38 # v6
+        with:
+          node-version: 24.20.0
+          registry-url: https://registry.npmjs.org/
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Assert release versions and metadata
+        run: node scripts/assert-release.mjs "$GITHUB_REF_NAME"
+
+      - name: Check formatting
+        run: pnpm format:check
+
+      - name: Lint
+        run: pnpm lint
+
+      - name: Typecheck
+        run: pnpm typecheck
+
+      - name: Run unit tests
+        run: pnpm test
+
+      - name: Run integration tests
+        run: pnpm test:integration
+
+      - name: Verify public example
+        run: pnpm test:example
+
+      - name: Run generated performance smoke
+        run: pnpm benchmark
+
+      - name: Test packed packages
+        run: pnpm test:package
+
+      - name: Assemble release tarballs
+        run: |
+          mkdir -p release
+          pnpm --filter @pptxlint/core pack --pack-destination release
+          pnpm --filter pptxlint pack --pack-destination release
+
+      - name: Preserve release tarballs
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: npm-tarballs-${{ github.ref_name }}
+          path: release/*.tgz
+          if-no-files-found: error
+
+  publish:
+    name: Publish through npm trusted publishing
+    needs: verify
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    permissions:
+      id-token: write
+
+    steps:
+      - name: Download verified release tarballs
+        uses: actions/download-artifact@634f93cb2916e3fdff6788551b99b062d0335ce0 # v5
+        with:
+          name: npm-tarballs-${{ github.ref_name }}
+          path: release
+
+      - name: Set up trusted-publishing runtime
+        uses: actions/setup-node@249970729cb0ef3589644e2896645e5dc5ba9c38 # v6
+        with:
+          node-version: 24.20.0
+
+      - name: Confirm trusted-publishing capable npm CLI
+        run: test "$(npm --version)" = "11.19.0"
+
+      - name: Publish core, then CLI
+        shell: bash
+        run: |
+          version="${GITHUB_REF_NAME#v}"
+          if npm view "@pptxlint/core@${version}" version --json >/dev/null 2>&1; then
+            echo "@pptxlint/core@${version} already exists; keeping the immutable registry artifact."
+          else
+            npm publish "release/pptxlint-core-${version}.tgz" --access public --tag latest
+          fi
+          if npm view "pptxlint@${version}" version --json >/dev/null 2>&1; then
+            echo "pptxlint@${version} already exists; keeping the immutable registry artifact."
+          else
+            npm publish "release/pptxlint-${version}.tgz" --access public --tag latest
+          fi
+
+  registry-smoke:
+    name: Registry smoke (Node ${{ matrix.node }})
+    needs: publish
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    strategy:
+      fail-fast: false
+      matrix:
+        node: [22.13.0, 24]
+
+    steps:
+      - name: Check out exact tag
+        uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 # v5
+
+      - name: Set up Node.js ${{ matrix.node }}
+        uses: actions/setup-node@249970729cb0ef3589644e2896645e5dc5ba9c38 # v6
+        with:
+          node-version: ${{ matrix.node }}
+          registry-url: https://registry.npmjs.org/
+
+      - name: Use the release npm CLI
+        run: npm install --global npm@11.19.1
+
+      - name: Install and test registry packages
+        shell: bash
+        run: node scripts/registry-smoke.mjs "${GITHUB_REF_NAME#v}"

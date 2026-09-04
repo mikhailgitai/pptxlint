@@ -1,0 +1,11 @@
+**/dist/
+**/node_modules/
+.pnpm-store/
+coverage/
+fixtures/generated/
+pnpm-lock.yaml
+schemas/sarif-2.1.0.schema.json
+**/LICENSE
+**/NOTICE
+**/*.pptx
+examples/*.expected.txt

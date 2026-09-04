@@ -1,0 +1,268 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://unpkg.com/@pptxlint/core@0.1.1-beta.0/dist/schemas/pptxlint-report.schema.json",
+  "title": "pptxlint command report",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schemaVersion",
+    "toolVersion",
+    "configHash",
+    "analysisComplete",
+    "inputs",
+    "summary",
+    "timingsMs"
+  ],
+  "properties": {
+    "schemaVersion": { "const": 1 },
+    "toolVersion": { "type": "string", "minLength": 1 },
+    "configHash": { "$ref": "#/$defs/fingerprint" },
+    "analysisComplete": { "type": "boolean" },
+    "inputs": {
+      "type": "array",
+      "items": { "$ref": "#/$defs/inputReport" }
+    },
+    "summary": { "$ref": "#/$defs/summary" },
+    "timingsMs": {
+      "type": "object",
+      "additionalProperties": { "type": "number", "minimum": 0 }
+    },
+    "peakRssBytes": { "type": "integer", "minimum": 0 }
+  },
+  "$defs": {
+    "inputReport": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "schemaVersion",
+        "input",
+        "findings",
+        "suppressedFindings",
+        "unusedSuppressions",
+        "resolvedFindings",
+        "diagnostics",
+        "skippedRules",
+        "analysisComplete",
+        "summary"
+      ],
+      "properties": {
+        "schemaVersion": { "const": 1 },
+        "input": { "$ref": "#/$defs/input" },
+        "findings": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/finding" }
+        },
+        "suppressedFindings": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/suppressedFinding" }
+        },
+        "unusedSuppressions": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/unusedSuppression" }
+        },
+        "resolvedFindings": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/resolvedFinding" }
+        },
+        "diagnostics": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/diagnostic" }
+        },
+        "skippedRules": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/ruleId" },
+          "uniqueItems": true
+        },
+        "analysisComplete": { "type": "boolean" },
+        "summary": { "$ref": "#/$defs/summary" }
+      }
+    },
+    "input": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["file", "inputKey", "sourceSha256"],
+      "properties": {
+        "file": { "type": "string", "minLength": 1 },
+        "inputKey": { "type": "string", "minLength": 1 },
+        "sourceSha256": {
+          "type": "string",
+          "pattern": "^[a-f0-9]{64}$"
+        }
+      }
+    },
+    "finding": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "ruleId",
+        "severity",
+        "status",
+        "message",
+        "file",
+        "location",
+        "evidence",
+        "fingerprint"
+      ],
+      "properties": {
+        "ruleId": { "$ref": "#/$defs/ruleId" },
+        "severity": { "$ref": "#/$defs/severity" },
+        "status": { "enum": ["new", "existing"] },
+        "message": { "type": "string", "minLength": 1 },
+        "file": { "type": "string", "minLength": 1 },
+        "location": { "$ref": "#/$defs/location" },
+        "evidence": { "$ref": "#/$defs/evidenceObject" },
+        "fingerprint": { "$ref": "#/$defs/fingerprint" }
+      }
+    },
+    "suppressedFinding": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["finding", "suppressionIndex"],
+      "properties": {
+        "finding": { "$ref": "#/$defs/finding" },
+        "suppressionIndex": { "type": "integer", "minimum": 0 },
+        "reason": { "type": "string", "minLength": 1 }
+      }
+    },
+    "unusedSuppression": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["suppressionIndex", "ruleId"],
+      "properties": {
+        "suppressionIndex": { "type": "integer", "minimum": 0 },
+        "ruleId": { "$ref": "#/$defs/ruleId" },
+        "reason": { "type": "string", "minLength": 1 }
+      }
+    },
+    "resolvedFinding": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["fingerprint", "ruleId", "location"],
+      "properties": {
+        "fingerprint": { "$ref": "#/$defs/fingerprint" },
+        "ruleId": { "$ref": "#/$defs/ruleId" },
+        "location": { "$ref": "#/$defs/location" }
+      }
+    },
+    "diagnostic": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["code", "message", "partName", "relationshipId"],
+      "properties": {
+        "code": {
+          "enum": [
+            "ambiguous-part-name",
+            "archive-limit-exceeded",
+            "duplicate-content-type",
+            "duplicate-relationship-id",
+            "entry-read-failed",
+            "invalid-content-types",
+            "invalid-part-name",
+            "invalid-presentation",
+            "invalid-relationship-target",
+            "invalid-relationships",
+            "invalid-zip",
+            "malformed-xml",
+            "missing-content-types",
+            "missing-office-document",
+            "missing-presentation-part",
+            "missing-presentation-relationship",
+            "missing-presentation-target",
+            "unsupported-geometry"
+          ]
+        },
+        "message": { "type": "string", "minLength": 1 },
+        "partName": { "type": ["string", "null"] },
+        "relationshipId": { "type": ["string", "null"] }
+      }
+    },
+    "location": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "part": { "type": "string", "minLength": 1 },
+        "slideNumber": { "type": "integer", "minimum": 1 },
+        "slideId": { "type": "string", "minLength": 1 },
+        "shapeIds": {
+          "type": "array",
+          "items": { "type": "integer", "minimum": 0 },
+          "uniqueItems": true
+        },
+        "shapeNames": {
+          "type": "array",
+          "items": { "type": "string" }
+        },
+        "paragraphIndex": { "type": "integer", "minimum": 0 },
+        "runIndex": { "type": "integer", "minimum": 0 }
+      }
+    },
+    "summary": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "errors",
+        "warnings",
+        "total",
+        "new",
+        "existing",
+        "resolved",
+        "suppressed"
+      ],
+      "properties": {
+        "errors": { "type": "integer", "minimum": 0 },
+        "warnings": { "type": "integer", "minimum": 0 },
+        "total": { "type": "integer", "minimum": 0 },
+        "new": { "$ref": "#/$defs/severityCounts" },
+        "existing": { "$ref": "#/$defs/severityCounts" },
+        "resolved": { "type": "integer", "minimum": 0 },
+        "suppressed": { "type": "integer", "minimum": 0 }
+      }
+    },
+    "severityCounts": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["errors", "warnings", "total"],
+      "properties": {
+        "errors": { "type": "integer", "minimum": 0 },
+        "warnings": { "type": "integer", "minimum": 0 },
+        "total": { "type": "integer", "minimum": 0 }
+      }
+    },
+    "evidenceObject": {
+      "type": "object",
+      "additionalProperties": { "$ref": "#/$defs/evidenceValue" }
+    },
+    "evidenceValue": {
+      "oneOf": [
+        { "type": "boolean" },
+        { "type": "null" },
+        { "type": "number" },
+        { "type": "string" },
+        {
+          "type": "array",
+          "items": { "$ref": "#/$defs/evidenceValue" }
+        },
+        { "$ref": "#/$defs/evidenceObject" }
+      ]
+    },
+    "fingerprint": {
+      "type": "string",
+      "pattern": "^[a-f0-9]{64}$"
+    },
+    "severity": { "enum": ["warning", "error"] },
+    "ruleId": {
+      "enum": [
+        "package/broken-relationship",
+        "package/missing-media",
+        "package/malformed-xml",
+        "layout/outside-slide",
+        "layout/text-overlap",
+        "layout/text-occluded",
+        "text/min-font-size",
+        "text/autofit-scale-below-minimum",
+        "text/autofit-enabled",
+        "fonts/allowed"
+      ]
+    }
+  }
+}

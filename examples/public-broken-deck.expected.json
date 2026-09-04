@@ -1,0 +1,182 @@
+{
+  "schemaVersion": 1,
+  "toolVersion": "0.1.1-beta.0",
+  "configHash": "fc9f57e76658b4c848f6b36e02ec638b50b478f86e127aebdcb6ba6b269c8eb2",
+  "analysisComplete": true,
+  "inputs": [
+    {
+      "schemaVersion": 1,
+      "input": {
+        "file": "examples/public-broken-deck.pptx",
+        "inputKey": "examples/public-broken-deck.pptx",
+        "sourceSha256": "800f09ce822186ad03a558c26ada73c42439c973b17e506627c93b04fe176dc7"
+      },
+      "findings": [
+        {
+          "ruleId": "layout/outside-slide",
+          "severity": "warning",
+          "status": "new",
+          "message": "\"Shape outside slide\" extends 79.37pt beyond the right slide edge; 67.2% of its transformed area is outside.",
+          "file": "examples/public-broken-deck.pptx",
+          "location": {
+            "part": "ppt/slides/slide1.xml",
+            "slideNumber": 1,
+            "slideId": "256",
+            "shapeIds": [4],
+            "shapeNames": ["Shape outside slide"]
+          },
+          "evidence": {
+            "affectedEdges": ["right"],
+            "boundsEmu": {
+              "height": 900000,
+              "width": 1500000,
+              "x": 11700000,
+              "y": 4500000
+            },
+            "boundsPt": {
+              "height": 70.866,
+              "width": 118.11,
+              "x": 921.26,
+              "y": 354.331
+            },
+            "intersectionAreaEmu2": 442800000000,
+            "intersectionPolygonEmu": [
+              {
+                "x": 11700000,
+                "y": 4500000
+              },
+              {
+                "x": 12192000,
+                "y": 4500000
+              },
+              {
+                "x": 12192000,
+                "y": 5400000
+              },
+              {
+                "x": 11700000,
+                "y": 5400000
+              }
+            ],
+            "minOutsideRatio": 0.05,
+            "outsideAreaEmu2": 907200000000,
+            "outsideRatio": 0.672,
+            "shapeId": 4,
+            "shapeName": "Shape outside slide",
+            "slideBoundsEmu": {
+              "height": 6858000,
+              "width": 12192000,
+              "x": 0,
+              "y": 0
+            },
+            "toleranceEmu": 25400,
+            "tolerancePt": 2
+          },
+          "fingerprint": "b610fc1ccb18c1159962694e27f28ba93fa8aa0f9a58da6276cd0387afc9e821"
+        },
+        {
+          "ruleId": "text/autofit-scale-below-minimum",
+          "severity": "error",
+          "status": "new",
+          "message": "Stored fontScale reduces \"Over-compressed autofit\" text from 24pt to 9.6pt; the configured minimum is 12pt.",
+          "file": "examples/public-broken-deck.pptx",
+          "location": {
+            "part": "ppt/slides/slide1.xml",
+            "slideNumber": 1,
+            "slideId": "256",
+            "shapeIds": [3],
+            "shapeNames": ["Over-compressed autofit"],
+            "paragraphIndex": 0,
+            "runIndex": 0
+          },
+          "evidence": {
+            "baseFontSizePt": 24,
+            "baseSizeProvenance": {
+              "rawValue": "2400",
+              "sourceKind": "run-properties",
+              "sourcePart": "ppt/slides/slide1.xml"
+            },
+            "configuredMinimumPt": 12,
+            "effectiveFontSizePt": 9.6,
+            "fontScaleRatio": 0.4,
+            "placeholderKind": "other",
+            "rawFontScale": "40000",
+            "scaleSourceKind": "slide-body-properties",
+            "scaleSourcePart": "ppt/slides/slide1.xml",
+            "textBodyIndex": 0
+          },
+          "fingerprint": "4fb8a2226c58cc7fe79e57a94c1bcec9a296cbba0bbec92f57b7813a7c72aa1d"
+        },
+        {
+          "ruleId": "text/min-font-size",
+          "severity": "error",
+          "status": "new",
+          "message": "\"Body text below minimum\" uses 9pt text; the configured default minimum is 12pt.",
+          "file": "examples/public-broken-deck.pptx",
+          "location": {
+            "part": "ppt/slides/slide1.xml",
+            "slideNumber": 1,
+            "slideId": "256",
+            "shapeIds": [2],
+            "shapeNames": ["Body text below minimum"],
+            "paragraphIndex": 0,
+            "runIndex": 0
+          },
+          "evidence": {
+            "baseFontSizePt": 9,
+            "configuredMinimumPt": 12,
+            "placeholderKind": "other",
+            "sizeProvenance": {
+              "rawValue": "900",
+              "sourceKind": "run-properties",
+              "sourcePart": "ppt/slides/slide1.xml"
+            },
+            "textBodyIndex": 0
+          },
+          "fingerprint": "c038cd30376efd3f2e6cbda502b94de4b92293f6e91b51bb2c3bb4b2b7ede1ba"
+        }
+      ],
+      "suppressedFindings": [],
+      "unusedSuppressions": [],
+      "resolvedFindings": [],
+      "diagnostics": [],
+      "skippedRules": [],
+      "analysisComplete": true,
+      "summary": {
+        "errors": 2,
+        "warnings": 1,
+        "total": 3,
+        "new": {
+          "errors": 2,
+          "warnings": 1,
+          "total": 3
+        },
+        "existing": {
+          "errors": 0,
+          "warnings": 0,
+          "total": 0
+        },
+        "resolved": 0,
+        "suppressed": 0
+      }
+    }
+  ],
+  "summary": {
+    "errors": 2,
+    "warnings": 1,
+    "total": 3,
+    "new": {
+      "errors": 2,
+      "warnings": 1,
+      "total": 3
+    },
+    "existing": {
+      "errors": 0,
+      "warnings": 0,
+      "total": 0
+    },
+    "resolved": 0,
+    "suppressed": 0
+  },
+  "timingsMs": {}
+}

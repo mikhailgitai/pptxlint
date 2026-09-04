@@ -1,0 +1,38 @@
+{
+  "schemaVersion": 1,
+  "toolVersion": "0.1.0",
+  "reviewDate": "2026-08-31",
+  "reviewer": "human reviewer + Codex visual review",
+  "deckCount": 30,
+  "sourceFamilies": {
+    "google-slides-export": 4,
+    "metadata-absent-web-export": 4,
+    "powerpoint-mac": 6,
+    "powerpoint-windows": 16
+  },
+  "findingCount": 388,
+  "complete": true,
+  "minimumPrecisionPerRule": 0.9,
+  "rules": {
+    "layout/text-overlap": {
+      "truePositive": 145,
+      "falsePositive": 190,
+      "uncertain": 0,
+      "precision": 0.432836,
+      "defaultBeforeCalibration": "error",
+      "defaultAfterCalibration": "warning",
+      "disposition": "downgraded"
+    },
+    "layout/text-occluded": {
+      "truePositive": 0,
+      "falsePositive": 53,
+      "uncertain": 0,
+      "precision": 0,
+      "defaultBeforeCalibration": "error",
+      "defaultAfterCalibration": "off",
+      "disposition": "disabled"
+    }
+  },
+  "releaseCriterionMet": true,
+  "releaseDecision": "Raw precision targets were not met; every below-target layout rule was downgraded or disabled as required by the v0.1 release policy."
+}

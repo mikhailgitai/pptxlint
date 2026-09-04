@@ -1,0 +1,55 @@
+{
+  "name": "@pptxlint/core",
+  "version": "0.1.1-beta.0",
+  "description": "Deterministic PowerPoint analysis contracts and rules for pptxlint.",
+  "license": "Apache-2.0",
+  "author": "Mikhail Grankin",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/mikhailgitai/pptxlint.git",
+    "directory": "packages/core"
+  },
+  "homepage": "https://github.com/mikhailgitai/pptxlint#readme",
+  "bugs": {
+    "url": "https://github.com/mikhailgitai/pptxlint/issues"
+  },
+  "keywords": [
+    "powerpoint",
+    "pptx",
+    "lint",
+    "ci",
+    "sarif",
+    "ooxml"
+  ],
+  "type": "module",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    },
+    "./schemas/config": "./dist/schemas/pptxlint.schema.json",
+    "./schemas/report": "./dist/schemas/pptxlint-report.schema.json",
+    "./schemas/baseline": "./dist/schemas/pptxlint-baseline.schema.json"
+  },
+  "files": [
+    "dist",
+    "LICENSE",
+    "NOTICE",
+    "README.md"
+  ],
+  "engines": {
+    "node": "^22.13.0 || ^24.0.0"
+  },
+  "publishConfig": {
+    "access": "public",
+    "registry": "https://registry.npmjs.org/"
+  },
+  "scripts": {
+    "build": "tsc -b && node ../../scripts/copy-package-assets.mjs",
+    "typecheck": "tsc --noEmit --project tsconfig.json"
+  },
+  "dependencies": {
+    "@rgrove/parse-xml": "catalog:",
+    "@zip.js/zip.js": "catalog:"
+  }
+}

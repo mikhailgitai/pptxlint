@@ -1,0 +1,55 @@
+{
+  "name": "pptxlint",
+  "version": "0.1.1-beta.0",
+  "description": "A deterministic CI gate for generated PowerPoint files.",
+  "license": "Apache-2.0",
+  "author": "Mikhail Grankin",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/mikhailgitai/pptxlint.git",
+    "directory": "packages/cli"
+  },
+  "homepage": "https://github.com/mikhailgitai/pptxlint#readme",
+  "bugs": {
+    "url": "https://github.com/mikhailgitai/pptxlint/issues"
+  },
+  "keywords": [
+    "powerpoint",
+    "pptx",
+    "lint",
+    "ci",
+    "sarif",
+    "ooxml"
+  ],
+  "type": "module",
+  "bin": {
+    "pptxlint": "./dist/cli.js"
+  },
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    },
+    "./example": "./dist/examples/public-broken-deck.pptx"
+  },
+  "files": [
+    "dist",
+    "LICENSE",
+    "NOTICE",
+    "README.md"
+  ],
+  "engines": {
+    "node": "^22.13.0 || ^24.0.0"
+  },
+  "publishConfig": {
+    "access": "public",
+    "registry": "https://registry.npmjs.org/"
+  },
+  "scripts": {
+    "build": "tsc -b && node ../../scripts/copy-package-assets.mjs",
+    "typecheck": "tsc --noEmit --project tsconfig.json"
+  },
+  "dependencies": {
+    "@pptxlint/core": "workspace:*"
+  }
+}

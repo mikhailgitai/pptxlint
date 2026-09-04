@@ -1,0 +1,15 @@
+examples/public-broken-deck.pptx
+
+  slide 1 / shape 4
+  warning layout/outside-slide
+  "Shape outside slide" extends 79.37pt beyond the right slide edge; 67.2% of its transformed area is outside.
+
+  slide 1 / shape 3
+  error   text/autofit-scale-below-minimum
+  Stored fontScale reduces "Over-compressed autofit" text from 24pt to 9.6pt; the configured minimum is 12pt.
+
+  slide 1 / shape 2
+  error   text/min-font-size
+  "Body text below minimum" uses 9pt text; the configured default minimum is 12pt.
+
+✖ 3 new problems (2 errors, 1 warning)
