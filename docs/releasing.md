@@ -113,6 +113,10 @@ After the beta inspection and evidence record:
    workflow filename `publish.yml` for both package records;
 7. do not add a long-lived npm token to GitHub Actions;
 8. verify the workflow retains `id-token: write` only on the publish job.
+9. until the GitHub account's email-privacy setting is independently verified,
+   do not use a GitHub-generated squash merge: land reviewed commits with the
+   configured noreply identity and rerun the fresh-clone email audit after
+   every public ref change.
 
 Trusted-publisher configuration happens after the beta packages exist. Stable
 provenance requires the source repository to be public.

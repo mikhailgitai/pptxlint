@@ -25,11 +25,16 @@ and immutable `v0.1.0` tag. Those Git objects are deliberately not part of the
 public repository because their author metadata contains a private email
 address.
 
-The canonical `mikhailgitai/pptxlint` repository was recreated with `git init`
-from the tracked-file snapshot of private documentation merge `4a3e8be`. Its
-privacy-safe root commit is `dd24387b7cbb0067d74e3d302c95f1ef0fe9d3b0`.
-No `.git` directory, historical refs, tags, GitHub pull requests, or untracked
-files were copied. Public history uses only
+An initial clean bootstrap was returned to private visibility immediately
+after a GitHub-generated squash merge reintroduced account email metadata. It
+was renamed to `mikhailgitai/pptxlint-public-bootstrap-private` and none of its
+Git objects were reused.
+
+The canonical `mikhailgitai/pptxlint` repository was then recreated again with
+`git init` from a tracked-file archive only. Its final privacy-safe root commit
+is `0f652b59ed4d1aa7740abf15c2d38d96f2567c40`. No `.git` directory,
+historical refs, tags, GitHub pull requests, untracked files, or objects from
+the first bootstrap were copied. Public history uses only
 `236253073+mikhailgitai@users.noreply.github.com` for author and committer
 metadata.
 
@@ -40,14 +45,12 @@ claim that the public root commit produced the already-published tarballs.
 
 ## Public repository and trusted publishing evidence
 
-The new [`mikhailgitai/pptxlint`](https://github.com/mikhailgitai/pptxlint)
-repository became public on 2026-09-04. An unauthenticated fresh clone at HEAD
-`9b91e50` contained exactly two commits and no tags. Running
-`git log --format='%ae%n%ce' --all` returned only
+Before its final visibility change, the replacement root contained one commit
+and no tags. Running `git log --format='%ae%n%ce' --all` returned only
 `236253073+mikhailgitai@users.noreply.github.com`; the private email was absent
 from tracked files, and private beta commit `65ec71a` was not present as an
 object. All four Linux/Windows Node.js 22/24 jobs passed in
-[CI run 33917019679](https://github.com/mikhailgitai/pptxlint/actions/runs/33917019679).
+[CI run 33918708210](https://github.com/mikhailgitai/pptxlint/actions/runs/33918708210).
 
 npm trusted publishers were then created for both `@pptxlint/core` and
 `pptxlint` with these exact claims:
