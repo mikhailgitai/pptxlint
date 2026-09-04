@@ -4,7 +4,7 @@
 by the `pptxlint` CLI.
 
 ```sh
-npm install @pptxlint/core@next
+npm install @pptxlint/core
 ```
 
 The stable public contracts in the beta are rule IDs, configuration schema,

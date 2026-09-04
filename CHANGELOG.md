@@ -2,7 +2,7 @@
 
 All notable changes to pptxlint are documented here.
 
-## 0.1.1-beta.0 - Unreleased
+## 0.1.1 - 2026-09-04
 
 Public-beta distribution hardening:
 
@@ -20,9 +20,9 @@ Public-beta distribution hardening:
 - ship the reproducible broken deck in the CLI tarball and use exact-version
   unpkg schema URLs that resolve during the prerelease period.
 
-The prerelease must be published manually with `--tag next`; it must not move
-the `latest` dist-tag. Stable `0.1.1` remains gated by a public repository and
-configured npm trusted publishers.
+The `0.1.1-beta.0` prerelease was published manually with `--tag next` before
+the privacy-safe public repository and npm trusted publishers were configured.
+Stable `0.1.1` is published through the tokenless OIDC release workflow.
 
 ## 0.1.0 - 2026-08-31
 

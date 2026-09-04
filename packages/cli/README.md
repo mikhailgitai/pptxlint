@@ -5,10 +5,10 @@ checks package integrity, layout, text, and font policy without opening
 PowerPoint, then emits stable JSON, baselines, suppressions, or SARIF.
 
 ```sh
-npx pptxlint@next presentation.pptx
+npx pptxlint presentation.pptx
 ```
 
-Try the fixture included in the package after installing `pptxlint@next`:
+Try the fixture included in the package after installing `pptxlint`:
 
 ```sh
 node -e "require('node:fs').copyFileSync(require.resolve('pptxlint/example'), 'public-broken-deck.pptx')"

@@ -25,7 +25,7 @@ The public beta is Apache-2.0 licensed and supports Node.js `^22.13.0` and
 Install the CLI in the project that generates your presentation:
 
 ```sh
-npm install --save-dev pptxlint@next
+npm install --save-dev pptxlint
 npx pptxlint build/deck.pptx
 ```
 
@@ -50,7 +50,7 @@ reproducible.
 Install the generator and linter:
 
 ```sh
-npm install --save-dev pptxgenjs pptxlint@next
+npm install --save-dev pptxgenjs pptxlint
 ```
 
 Create `generate-deck.mjs`:
@@ -93,7 +93,7 @@ Install the Python generator and the Node.js CLI:
 
 ```sh
 python -m pip install python-pptx
-npm install --save-dev pptxlint@next
+npm install --save-dev pptxlint
 ```
 
 Create `generate_deck.py`:
@@ -201,7 +201,7 @@ Create `.pptxlintrc.json` only when the defaults need adjustment:
 
 ```json
 {
-  "$schema": "https://unpkg.com/@pptxlint/core@0.1.1-beta.0/dist/schemas/pptxlint.schema.json",
+  "$schema": "https://unpkg.com/@pptxlint/core@0.1.1/dist/schemas/pptxlint.schema.json",
   "extends": ["recommended"],
   "failOn": "error",
   "ignore": [

@@ -1,6 +1,6 @@
 {
   "name": "pptxlint",
-  "version": "0.1.1-beta.0",
+  "version": "0.1.1",
   "description": "A deterministic CI gate for generated PowerPoint files.",
   "license": "Apache-2.0",
   "author": "Mikhail Grankin",
