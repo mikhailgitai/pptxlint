@@ -12,9 +12,9 @@ PR 11 prepared `0.1.1-beta.0` for public distribution without changing the
 historical `v0.1.0` tag. The CLI and core are Apache-2.0 licensed and were
 published to npm on 2026-09-04 from private merge commit `65ec71a`; the root
 workspace package remains private. The privacy-safe repository is now public
-and both npm trusted publishers are configured. Stable `0.1.1` still requires
-the reviewed stable release commit, tag workflow, and Node.js 22/24 registry
-smokes.
+and both npm trusted publishers are configured. Stable `0.1.1` was attempted
+but did not reach npm. Recovery release `0.1.2` requires the corrected tag
+workflow and Node.js 22/24 registry smokes.
 
 ## Repository privacy migration
 
@@ -64,8 +64,24 @@ npm trusted publishers were then created for both `@pptxlint/core` and
 The release workflow grants `id-token: write` only to its minimal publish job,
 uses GitHub-hosted runners, and does not provide a long-lived npm token. No
 stable package or release tag was created while configuring the trust
-relationships; their first end-to-end OIDC and automatic-provenance check will
-be the reviewed `v0.1.1` release.
+relationships; their first successful end-to-end OIDC and
+automatic-provenance check will be the reviewed `v0.1.2` recovery release.
+
+## Failed `v0.1.1` stable publication attempt
+
+Public tag `v0.1.1` points immutably to release commit
+`6c53b442df2ee34149afeb959f922bb159f9608f`. Every verification and artifact
+assembly gate passed in
+[workflow run 33920478970](https://github.com/mikhailgitai/pptxlint/actions/runs/33920478970).
+The publish job then passed `release/pptxlint-core-0.1.1.tgz` to npm without an
+explicit `./` prefix. npm interpreted that argument as a GitHub package spec
+and failed with exit code 128 before contacting the registry. The CLI publish
+was never attempted, registry smoke was skipped, and neither stable `0.1.1`
+package exists in npm.
+
+The tag is not moved or deleted. Recovery version `0.1.2` uses explicit local
+tarball paths and adds assertions that prevent this failure mode from
+recurring.
 
 ## Public-beta distribution evidence
 
@@ -116,10 +132,10 @@ npm created both `next` and `latest` for each brand-new package even though the
 publish commands explicitly used `--tag next`. An interactive 2FA-authenticated
 attempt to remove the core `latest` tag was rejected by the registry with
 `E400`; no package or version was unpublished. The owner accepted this measured
-bootstrap exception. Until stable `0.1.1` is released, both tags resolve to
+bootstrap exception. Until stable `0.1.2` is released, both tags resolve to
 `0.1.1-beta.0`, including an unqualified `npm install pptxlint`.
 
-The stable tag workflow must move `latest` to `0.1.1` for both packages while
+The stable tag workflow must move `latest` to `0.1.2` for both packages while
 leaving `next` on `0.1.1-beta.0`. No future prerelease may intentionally move
 `latest`.
 

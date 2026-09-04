@@ -201,7 +201,7 @@ Create `.pptxlintrc.json` only when the defaults need adjustment:
 
 ```json
 {
-  "$schema": "https://unpkg.com/@pptxlint/core@0.1.1/dist/schemas/pptxlint.schema.json",
+  "$schema": "https://unpkg.com/@pptxlint/core@0.1.2/dist/schemas/pptxlint.schema.json",
   "extends": ["recommended"],
   "failOn": "error",
   "ignore": [

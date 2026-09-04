@@ -104,6 +104,16 @@ assert.doesNotMatch(
   /^\s+registry-url:/mu,
   "The OIDC publish job must not configure setup-node legacy npm authentication.",
 );
+assert.match(
+  publishJob,
+  /npm publish "\.\/release\/pptxlint-core-\$\{version\}\.tgz"/u,
+  "The OIDC publish job must identify the core tarball with an explicit local path.",
+);
+assert.match(
+  publishJob,
+  /npm publish "\.\/release\/pptxlint-\$\{version\}\.tgz"/u,
+  "The OIDC publish job must identify the CLI tarball with an explicit local path.",
+);
 
 process.stdout.write(`Release invariants passed for ${tag}@${channel}.\n`);
 

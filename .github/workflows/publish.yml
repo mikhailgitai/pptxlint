@@ -107,12 +107,12 @@ jobs:
           if npm view "@pptxlint/core@${version}" version --json >/dev/null 2>&1; then
             echo "@pptxlint/core@${version} already exists; keeping the immutable registry artifact."
           else
-            npm publish "release/pptxlint-core-${version}.tgz" --access public --tag latest
+            npm publish "./release/pptxlint-core-${version}.tgz" --access public --tag latest
           fi
           if npm view "pptxlint@${version}" version --json >/dev/null 2>&1; then
             echo "pptxlint@${version} already exists; keeping the immutable registry artifact."
           else
-            npm publish "release/pptxlint-${version}.tgz" --access public --tag latest
+            npm publish "./release/pptxlint-${version}.tgz" --access public --tag latest
           fi
 
   registry-smoke:

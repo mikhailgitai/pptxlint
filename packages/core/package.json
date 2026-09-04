@@ -1,6 +1,6 @@
 {
   "name": "@pptxlint/core",
-  "version": "0.1.1",
+  "version": "0.1.2",
   "description": "Deterministic PowerPoint analysis contracts and rules for pptxlint.",
   "license": "Apache-2.0",
   "author": "Mikhail Grankin",

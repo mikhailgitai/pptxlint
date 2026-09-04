@@ -9,8 +9,8 @@ exports[`CLI workspace skeleton > emits deterministic multi-file SARIF with rule
       "tool": {
         "driver": {
           "name": "pptxlint",
-          "version": "0.1.1",
-          "semanticVersion": "0.1.1",
+          "version": "0.1.2",
+          "semanticVersion": "0.1.2",
           "rules": [
             {
               "id": "package/broken-relationship",
@@ -301,7 +301,7 @@ exports[`CLI workspace skeleton > emits deterministic multi-file SARIF with rule
 exports[`CLI workspace skeleton > emits one deterministic multi-file JSON report that matches its schema 1`] = `
 "{
   "schemaVersion": 1,
-  "toolVersion": "0.1.1",
+  "toolVersion": "0.1.2",
   "configHash": "fc9f57e76658b4c848f6b36e02ec638b50b478f86e127aebdcb6ba6b269c8eb2",
   "analysisComplete": true,
   "inputs": [

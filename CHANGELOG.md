@@ -2,6 +2,20 @@
 
 All notable changes to pptxlint are documented here.
 
+## 0.1.2 - 2026-09-04
+
+Stable public-beta recovery release:
+
+- publish the verified npm tarballs through trusted publishing using explicit
+  local `./release/` paths;
+- assert those paths as release invariants so npm cannot reinterpret them as
+  GitHub package specifications.
+
+The immutable public `v0.1.1` tag passed every verification gate, but its
+publish job failed before contacting npm because the tarball arguments omitted
+`./`. No `0.1.1` package was published. Version `0.1.2` supersedes that failed
+Git-only release attempt.
+
 ## 0.1.1 - 2026-09-04
 
 Public-beta distribution hardening:
@@ -22,7 +36,7 @@ Public-beta distribution hardening:
 
 The `0.1.1-beta.0` prerelease was published manually with `--tag next` before
 the privacy-safe public repository and npm trusted publishers were configured.
-Stable `0.1.1` is published through the tokenless OIDC release workflow.
+The stable Git tag did not produce npm packages and is superseded by `0.1.2`.
 
 ## 0.1.0 - 2026-08-31
 

@@ -7,7 +7,7 @@ PR 11
   -> manual 0.1.1-beta.0@next
   -> privacy-safe public repository
   -> npm trusted publishing
-  -> v0.1.1@latest
+  -> v0.1.2@latest
   -> registry smoke
 ```
 
@@ -56,7 +56,7 @@ public yet, and provenance is deliberately reserved for trusted publishing.
 
 ```sh
 npm whoami
-npm publish release/pptxlint-core-0.1.1-beta.0.tgz --access public --tag next
+npm publish ./release/pptxlint-core-0.1.1-beta.0.tgz --access public --tag next
 ```
 
 After npm prints the successful `+ @pptxlint/core@0.1.1-beta.0` line, a newly
@@ -75,7 +75,7 @@ https://unpkg.com/@pptxlint/core@0.1.1-beta.0/dist/schemas/pptxlint.schema.json
 Then publish the CLI:
 
 ```sh
-npm publish release/pptxlint-0.1.1-beta.0.tgz --access public --tag next
+npm publish ./release/pptxlint-0.1.1-beta.0.tgz --access public --tag next
 ```
 
 Confirm the registry tags:
@@ -91,7 +91,7 @@ interactive attempt to remove that `latest` tag with `E400`. This measured
 exception is recorded in [release-evidence.md](release-evidence.md): until the
 stable release, `next` and `latest` both resolve to `0.1.1-beta.0`. Do not
 unpublish or replace the beta. Stable publication must move `latest` to
-`0.1.1`, and later prereleases must never move it.
+`0.1.2`, and later prereleases must never move it.
 
 Install both packages into a separate empty directory and run the public
 example before continuing. Do not switch the repository to public until the
@@ -121,17 +121,22 @@ After the beta inspection and evidence record:
 Trusted-publisher configuration happens after the beta packages exist. Stable
 provenance requires the source repository to be public.
 
-## 4. Prepare stable `0.1.1`
+## 4. Prepare stable `0.1.2`
+
+The immutable public `v0.1.1` tag passed verification but did not publish a
+package. Its publish commands used `release/*.tgz` without an explicit `./`, so
+npm interpreted the argument as a GitHub package spec and failed before
+contacting the registry. Both `0.1.1` npm versions remain unused. The corrected
+recovery release is `0.1.2`; do not move or recreate `v0.1.1`.
 
 In a small release-only commit:
 
-1. change the root, CLI, and core manifests from `0.1.1-beta.0` to `0.1.1`;
-2. change the changelog heading from prerelease to `0.1.1` and add the release
-   date;
+1. change the root, CLI, and core manifests to `0.1.2`;
+2. add the `0.1.2` changelog heading and release date;
 3. rebuild and refresh the expected public report because `toolVersion`
    changes;
-4. rerun every gate and `node scripts/assert-release.mjs v0.1.1`;
-5. replace `0.1.1-beta.0` with `0.1.1` in all schema IDs, the baseline schema
+4. rerun every gate and `node scripts/assert-release.mjs v0.1.2`;
+5. use `0.1.2` in all schema IDs, the baseline schema
    reference, and documented `$schema` URLs; the release assertion checks the
    exact immutable unpkg package version.
 
@@ -143,12 +148,13 @@ node scripts/verify-public-example.mjs --update
 pnpm test:example
 ```
 
-Create and push the new `v0.1.1` tag only from the reviewed stable commit. Do
-not copy, recreate, or move the private archive's `v0.1.0` tag.
+Create and push the new `v0.1.2` tag only from the reviewed recovery commit. Do
+not move `v0.1.1`, or copy, recreate, or move the private archive's `v0.1.0`
+tag.
 
 ## 5. Automated stable publication
 
-Pushing `v0.1.1` starts `.github/workflows/publish.yml`. The workflow:
+Pushing `v0.1.2` starts `.github/workflows/publish.yml`. The workflow:
 
 - rejects non-stable semver tags and manifest/tag mismatches;
 - runs all quality, benchmark, example, and package gates in a job without OIDC
@@ -174,5 +180,5 @@ immutable.
 Record the source commit, workflow URL, package URLs, provenance result,
 registry-smoke result, and final dist-tags in
 [release-evidence.md](release-evidence.md). Stable release is complete only
-when `latest` is `0.1.1`, `next` remains the beta, and both Node.js registry
+when `latest` is `0.1.2`, `next` remains the beta, and both Node.js registry
 smokes pass.

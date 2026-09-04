@@ -1,6 +1,6 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://unpkg.com/@pptxlint/core@0.1.1/dist/schemas/pptxlint-baseline.schema.json",
+  "$id": "https://unpkg.com/@pptxlint/core@0.1.2/dist/schemas/pptxlint-baseline.schema.json",
   "title": "pptxlint baseline",
   "type": "object",
   "additionalProperties": false,
@@ -28,7 +28,7 @@
                   "pattern": "^[a-f0-9]{64}$"
                 },
                 "ruleId": {
-                  "$ref": "https://unpkg.com/@pptxlint/core@0.1.1/dist/schemas/pptxlint.schema.json#/$defs/ruleId"
+                  "$ref": "https://unpkg.com/@pptxlint/core@0.1.2/dist/schemas/pptxlint.schema.json#/$defs/ruleId"
                 },
                 "location": {
                   "type": "object",
