@@ -4,8 +4,9 @@ Status: accepted on 2026-08-31.
 
 Execution note, 2026-09-04: the immutable `v0.1.1` tag passed verification but
 did not publish to npm because its tarball arguments lacked explicit local
-`./` paths. No stable package was created. The corrected recovery release is
-`v0.1.2`; the original sequence below is retained as the accepted plan.
+`./` paths. No stable package was created. The corrected `v0.1.2` recovery
+release completed OIDC publication, provenance, and Node.js 22/24 registry
+smokes; the original sequence below is retained as the accepted plan.
 
 The milestone after the private `v0.1.0` release candidate is **public beta and
 the first production users**, not v0.2 feature development. The shortest
