@@ -1,22 +1,22 @@
 # Deferred platform and API concept
 
-> **Статус: вне scope v0.1. Не реализовывать по этому документу.**
+> **Status: outside v0.1 scope. Do not implement from this document.**
 
-Первый продукт — локальный open-source CLI `pptxlint`. API и web dashboard имеют
-смысл только после подтверждения качества rules на реальных decks и появления
-регулярного CI usage.
+The first product is the local open-source CLI `pptxlint`. An API and web
+dashboard become useful only after rule quality has been validated on real decks
+and regular CI usage has emerged.
 
-## Возможная платная платформа после v0.1
+## Potential paid platform after v0.1
 
 - hosted CI/PR reports;
 - organization-wide policies;
-- managed baselines и historical regression;
-- artifact rendering и slide thumbnails;
+- managed baselines and historical regression;
+- artifact rendering and slide thumbnails;
 - visual diffs;
-- GitHub Check/App с deep links;
-- retention, audit и team access controls.
+- GitHub Check/App with deep links;
+- retention, audit, and team access controls.
 
-Предполагаемый pipeline:
+Proposed pipeline:
 
 ```text
 Codex / Claude / generator
@@ -27,6 +27,6 @@ Codex / Claude / generator
   → CI artifact / PR report
 ```
 
-Никакие HTTP routes, database schemas, auth flows или billing contracts не
-фиксируются до получения usage evidence. `@pptxlint/core` остаётся единым
-источником findings для CLI и возможной будущей платформы.
+No HTTP routes, database schemas, auth flows, or billing contracts are finalized
+until usage evidence is available. `@pptxlint/core` remains the single source of
+findings for the CLI and any future platform.

@@ -1,11 +1,11 @@
-# План реализации pptxlint v0.1
+# pptxlint v0.1 implementation plan
 
-Детальная нарезка на mergeable изменения находится в
-[плане Pull Requests](pull-request-plan.md).
+A detailed breakdown into mergeable changes is available in the
+[Pull Request plan](pull-request-plan.md).
 
-## 1. Стратегия поставки
+## 1. Delivery strategy
 
-V0.1 строится как CLI-first vertical slice:
+V0.1 is built as a CLI-first vertical slice:
 
 ```text
 PPTX bytes
@@ -15,82 +15,82 @@ PPTX bytes
   → exit 0/1/2
 ```
 
-Не создаются web/API/repair/renderer компоненты. Главная метрика качества —
-полезные high-confidence findings с низким false-positive rate.
+No web/API/repair/renderer components are created. The primary quality metric is
+useful, high-confidence findings with a low false-positive rate.
 
-Ориентировочная оценка: **12–18 инженерных дней** для одного разработчика плюс
-время на сбор и ручную разметку реального validation corpus.
+Approximate estimate: **12–18 engineering days** for one developer, plus time to
+collect and manually label a real validation corpus.
 
 ## 2. Release slices
 
-| Срез          |    PR | Проверяемый результат                                  |
-| ------------- | ----: | ------------------------------------------------------ |
-| Foundation    | 01–03 | безопасно читается PPTX и строится shared context      |
-| CLI alpha     |    04 | package rules работают через CLI и exit codes          |
-| Rule complete | 05–07 | все десять v0.1 rules реализованы                      |
-| CI beta       | 08–09 | suppressions, baseline, JSON и SARIF                   |
-| v0.1          |    10 | security/performance/corpus calibration и release docs |
+| Slice         |    PR | Verifiable outcome                                       |
+| ------------- | ----: | -------------------------------------------------------- |
+| Foundation    | 01–03 | safe PPTX reading and shared context construction        |
+| CLI alpha     |    04 | package rules work through the CLI and exit codes        |
+| Rule complete | 05–07 | all ten v0.1 rules implemented                           |
+| CI beta       | 08–09 | suppressions, baseline, JSON, and SARIF                  |
+| v0.1          |    10 | security/performance/corpus calibration and release docs |
 
-## 3. Этап 1 — workspace и adapter contracts
+## 3. Stage 1 — workspace and adapter contracts
 
-Соответствует PR 01–02.
+Corresponds to PR 01–02.
 
-### Результат
+### Deliverables
 
-- pnpm workspace, Node 22, TypeScript strict, Vitest и CI;
-- собираемые `@pptxlint/core` и `pptxlint` packages;
+- pnpm workspace, Node 22, TypeScript strict, Vitest, and CI;
+- buildable `@pptxlint/core` and `pptxlint` packages;
 - ZIP reader/writer-independent interfaces;
 - namespace-aware XML parser adapter;
-- duplicate entry и malformed XML contract tests;
+- duplicate entry and malformed XML contract tests;
 - synthetic minimal PPTX builder;
-- ADR с выбранными libraries и ограничениями.
+- ADR documenting selected libraries and limitations.
 
 ### Exit criteria
 
-- root format/lint/typecheck/test/build проходят;
-- packed CLI package можно установить в temporary consumer project;
-- duplicate ZIP names не теряются из-за map overwrite;
-- DTD/entities не разрешаются;
-- fixture generation воспроизводима.
+- root format/lint/typecheck/test/build pass;
+- the packed CLI package installs in a temporary consumer project;
+- duplicate ZIP names are not lost through map overwrites;
+- DTD/entities are not resolved;
+- fixture generation is reproducible.
 
-## 4. Этап 2 — OPC/Presentation context
+## 4. Stage 2 — OPC/Presentation context
 
-Соответствует PR 03.
+Corresponds to PR 03.
 
-### Результат
+### Deliverables
 
-- canonical part paths и security limits;
-- lazy `ArchiveIndex` и cached `XmlPartStore`;
-- content types и relationship graph;
+- canonical part paths and security limits;
+- lazy `ArchiveIndex` and cached `XmlPartStore`;
+- content types and relationship graph;
 - slide order, slide/layout/master/theme chain;
-- shape inventory и z-order;
-- partial context с typed diagnostics;
-- source SHA-256 и normalized input key.
+- shape inventory and z-order;
+- partial context with typed diagnostics;
+- source SHA-256 and normalized input key.
 
 ### Critical tests
 
-- root и part relationship resolution;
-- external targets никогда не fetch-ятся;
-- nonsequential slide filenames дают правильные slide numbers;
-- missing/malformed part не вызывает cascade exceptions;
-- один entry/XML part читается и парсится не более одного раза.
+- root and part relationship resolution;
+- external targets are never fetched;
+- nonsequential slide filenames produce correct slide numbers;
+- missing/malformed parts do not cause cascading exceptions;
+- each entry/XML part is read and parsed at most once.
 
-## 5. Этап 3 — lint engine и CLI alpha
+## 5. Stage 3 — lint engine and CLI alpha
 
-Соответствует PR 04.
+Corresponds to PR 04.
 
-### Результат
+### Deliverables
 
 - versioned finding/report contracts;
-- rule registry и prerequisites;
+- rule registry and prerequisites;
 - deterministic fingerprints/sorting;
-- JSON config schema и preset `recommended`;
-- severity overrides и exit policy;
+- JSON config schema and `recommended` preset;
+- severity overrides and exit policy;
 - package rules:
   - `package/broken-relationship`;
   - `package/missing-media`;
   - `package/malformed-xml`;
-- минимальный stylish CLI output.
+- minimal stylish CLI output.
 
 ### Exit criteria
 
@@ -99,21 +99,21 @@ pnpm pptxlint fixtures/generated/missing-media.pptx
 # exit 1, exact source/rId/target evidence
 ```
 
-- Missing media создаёт один specialized finding.
-- Malformed XML внутри PPTX возвращает finding, не internal failure.
-- Повторный запуск даёт те же fingerprints и порядок.
-- Code 0/1/2 соответствует спецификации.
+- Missing media produces one specialized finding.
+- Malformed XML inside PPTX returns a finding rather than an internal failure.
+- Repeated runs produce identical fingerprints and ordering.
+- Codes 0/1/2 follow the specification.
 
-## 6. Этап 4 — geometry rules
+## 6. Stage 4 — geometry rules
 
-Соответствует PR 05–06.
+Corresponds to PR 05–06.
 
 ### 6.1 Geometry engine
 
 - EMU affine transforms;
-- nested groups, child coordinate spaces, rotation и flips;
+- nested groups, child coordinate spaces, rotation, and flips;
 - transformed polygon/bbox;
-- polygon intersection и slide clipping;
+- polygon intersection and slide clipping;
 - normalized overlap/outside ratios;
 - canonical shape-pair identity.
 
@@ -123,38 +123,38 @@ pnpm pptxlint fixtures/generated/missing-media.pptx
 - `layout/text-overlap`;
 - `layout/text-occluded`.
 
-Occlusion реализуется отдельно: нужны z-order, fill opacity и image alpha
-evidence. Unknown transparency не выдаётся за доказанное перекрытие.
+Occlusion is implemented separately: it requires z-order, fill opacity, and
+image alpha evidence. Unknown transparency is not treated as proven occlusion.
 
 ### Calibration fixtures
 
 - intentional full-bleed background;
-- text boxes с малым/большим пересечением;
+- text boxes with small/large overlaps;
 - rotated text boxes;
-- nested groups с scaling;
-- text под solid opaque shape;
-- text под transparent shape;
-- JPEG и PNG с/без alpha;
-- table cells и same-group constructs, которые нельзя считать обычной парой.
+- nested groups with scaling;
+- text under a solid opaque shape;
+- text under a transparent shape;
+- JPEG and PNG with/without alpha;
+- table cells and same-group constructs that cannot be treated as ordinary pairs.
 
 ### Exit criteria
 
-- Pair findings не дублируются в обратном порядке.
-- Evidence содержит transformed bounds и ratio.
-- Rule message говорит о text-frame geometry, не о pixel-perfect glyphs.
-- High-confidence negative fixtures не дают findings.
+- Pair findings are not duplicated in reverse order.
+- Evidence contains transformed bounds and ratio.
+- Rule messages describe text-frame geometry rather than pixel-perfect glyphs.
+- High-confidence negative fixtures produce no findings.
 
-## 7. Этап 5 — text, autofit и font policy
+## 7. Stage 5 — text, autofit, and font policy
 
-Соответствует PR 07.
+Corresponds to PR 07.
 
-### Результат
+### Deliverables
 
-- effective run style resolver с provenance;
+- effective run style resolver with provenance;
 - paragraph/list/placeholder/layout/master/theme inheritance;
 - title/body threshold classification;
 - normalized stored autofit scale;
-- explicit/theme font resolution для Latin/East Asian/Complex Script;
+- explicit/theme font resolution for Latin/East Asian/Complex Script;
 - rules:
   - `text/min-font-size`;
   - `text/autofit-scale-below-minimum`;
@@ -163,46 +163,46 @@ evidence. Unknown transparency не выдаётся за доказанное �
 
 ### Critical tests
 
-- explicit и inherited sizes;
+- explicit and inherited sizes;
 - theme font placeholders;
 - mixed scripts;
-- persisted scale ниже/выше minimum;
-- runtime autofit без scale;
+- persisted scale below/above the minimum;
+- runtime autofit without scale;
 - unsupported/unresolved style chain;
-- отсутствие duplicate minimum/autofit findings;
-- отсутствие зависимости от installed system fonts.
+- no duplicate minimum/autofit findings;
+- no dependency on installed system fonts.
 
 ### Exit criteria
 
-- Линтер никогда не сообщает вычисленный effective size без resolved base size и
+- The linter never reports a computed effective size without a resolved base size and
   valid persisted scale.
-- Unresolved values остаются evidence/controlled behavior, а не guessed default.
-- `fonts/allowed` выключен без configured allowlist.
+- Unresolved values remain evidence/controlled behavior rather than guessed defaults.
+- `fonts/allowed` is disabled without a configured allowlist.
 
-## 8. Этап 6 — suppressions и baseline
+## 8. Stage 6 — suppressions and baseline
 
-Соответствует PR 08.
+Corresponds to PR 08.
 
 ### Suppressions
 
-- exact match по rule + location selectors;
+- exact matching by rule + location selectors;
 - canonical shape pairs;
 - optional reason;
-- suppressed count и unused-suppression metadata;
-- применение до baseline.
+- suppressed count and unused-suppression metadata;
+- application before baseline comparison.
 
 ### Baseline
 
 - versioned deterministic JSON;
 - `--write-baseline`;
 - new/existing/resolved classification;
-- exit только по new gating findings;
+- exit determined only by new gating findings;
 - incompatible schema/tool major → code 2;
-- без slide text и absolute paths.
+- no slide text or absolute paths.
 
 ### Exit criteria
 
-Сценарий должен работать целиком:
+The complete scenario must work:
 
 ```text
 184 findings → write baseline
@@ -211,11 +211,11 @@ add one overlap → exit 1, 1 new
 remove seven old issues → 7 resolved
 ```
 
-## 9. Этап 7 — CI outputs и package UX
+## 9. Stage 7 — CI outputs and package UX
 
-Соответствует PR 09.
+Corresponds to PR 09.
 
-### Результат
+### Deliverables
 
 - final stylish formatter;
 - versioned JSON schema;
@@ -225,71 +225,71 @@ remove seven old issues → 7 resolved
 - multi-file aggregation;
 - `--output-file`;
 - clean npm-pack/install/execute smoke;
-- README quick start и CI examples.
+- README quick start and CI examples.
 
 ### Exit criteria
 
-- JSON и SARIF проходят schema/snapshot tests.
-- Machine output идёт только в stdout/output file; diagnostics — stderr.
-- SARIF docs не обещают line-level annotation или slide screenshot.
-- Command может быть запущена через локально packed package как
+- JSON and SARIF pass schema/snapshot tests.
+- Machine output goes only to stdout/output file; diagnostics go to stderr.
+- SARIF docs do not promise line-level annotations or slide screenshots.
+- The command can run through a locally packed package as
   `npx pptxlint deck.pptx`.
 
-## 10. Этап 8 — hardening и v0.1 release
+## 10. Stage 8 — hardening and v0.1 release
 
-Соответствует PR 10.
+Corresponds to PR 10.
 
 ### Security
 
-- ZIP bomb limits по declared и actual bytes;
+- ZIP bomb limits on declared and actual bytes;
 - path traversal;
 - duplicate entries;
 - DTD/entities;
 - malformed/truncated archives;
 - external relationship no-fetch;
-- redaction slide text/absolute paths из default machine output.
+- redaction of slide text/absolute paths from default machine output.
 
 ### Performance
 
 - generated 50 MiB/100-slide benchmark;
-- time и peak RSS записываются в release evidence;
-- rule timings доступны в JSON debug metadata;
-- archive/XML не копируются отдельно для каждого rule.
+- time and peak RSS recorded in release evidence;
+- rule timings available in JSON debug metadata;
+- archive/XML data is not copied separately for each rule.
 
 ### Real-deck calibration
 
-До фиксации defaults прогнать минимум 30 decks:
+Run at least 30 decks before finalizing defaults:
 
-- не менее трёх generators/sources, например python-pptx, PptxGenJS и
+- at least three generators/sources, such as python-pptx, PptxGenJS, and
   PowerPoint-authored/template-based output;
-- не хранить proprietary decks в репозитории;
-- вручную классифицировать layout/text findings как true/false positive;
-- записать анонимные aggregate counts и известные blind spots;
-- rule с недостаточной precision понизить до warning/off или сузить, а не
-  компенсировать длинным README disclaimer.
+- do not store proprietary decks in the repository;
+- manually classify layout/text findings as true/false positives;
+- record anonymous aggregate counts and known blind spots;
+- downgrade rules with insufficient precision to warning/off or narrow their
+  scope rather than compensate with a long README disclaimer.
 
-Цель для default error layout rules — не менее 90% precision на размеченном
-corpus. Это release gate продукта, но не статистическая гарантия для всех PPTX.
+Default error layout rules target at least 90% precision on the labeled corpus.
+This is a product release gate, not a statistical guarantee for every PPTX.
 
 ## 11. Fixture matrix
 
-Для каждого rule обязательны:
+Each rule requires:
 
 - clean negative;
-- positive на threshold boundary и явно выше threshold;
+- positive at the threshold boundary and clearly above the threshold;
 - malformed prerequisite;
-- grouped/rotated variant, если применимо;
+- grouped/rotated variant, where applicable;
 - deterministic fingerprint assertion;
 - config severity/off override;
-- suppression match и non-match;
+- suppression match and non-match;
 - baseline new/existing transition.
 
-Large fixtures генерируются в test setup. Бинарные customer files не
-коммитятся.
+Large fixtures are generated during test setup. Binary customer files are not
+committed.
 
 ## 12. CI gates
 
-Целевые root commands:
+Target root commands:
 
 ```bash
 pnpm format:check
@@ -301,33 +301,33 @@ pnpm build
 pnpm test:package
 ```
 
-Rules не merge-ятся без positive/negative fixture. Public report/config schema
-не меняется без schema tests и documentation update.
+Rules are not merged without positive/negative fixtures. Public report/config
+schemas are not changed without schema tests and documentation updates.
 
-## 13. Основные риски
+## 13. Main risks
 
-| Риск                                       | Снижение риска                                                    |
-| ------------------------------------------ | ----------------------------------------------------------------- |
-| Intentional overlaps создают noise         | suppressions в v0.1, high-confidence defaults, corpus calibration |
-| Baseline churn из-за regenerated shape IDs | exact stable fingerprint contract и честное documented limitation |
-| Group transforms дают неверную геометрию   | отдельный matrix test corpus до layout rules                      |
-| Autofit создаёт псевдоточность             | разделение stored scale и runtime uncertainty                     |
-| Font inheritance неполон                   | provenance/unresolved вместо guessed values                       |
-| SARIF не показывает слайд inline           | logical location сейчас; GitHub Check/rendering позже             |
-| Конкуренты имеют похожие rules             | фокус на config, baseline, contracts, local CI DX                 |
-| Scope снова расширяется                    | v0.1 non-goals и отдельный deferred roadmap                       |
+| Risk                                        | Mitigation                                                              |
+| ------------------------------------------- | ----------------------------------------------------------------------- |
+| Intentional overlaps create noise           | v0.1 suppressions, high-confidence defaults, corpus calibration         |
+| Baseline churn from regenerated shape IDs   | exact stable fingerprint contract and clearly documented limitation     |
+| Group transforms produce incorrect geometry | dedicated matrix test corpus before layout rules                        |
+| Autofit creates false precision             | distinguish stored scale from runtime uncertainty                       |
+| Font inheritance is incomplete              | provenance/unresolved instead of guessed values                         |
+| SARIF cannot show slides inline             | logical locations now; GitHub Check/rendering later                     |
+| Competitors have similar rules              | focus on config, baseline, contracts, and local CI developer experience |
+| Scope expands again                         | v0.1 non-goals and a separate deferred roadmap                          |
 
 ## 14. Definition of Done
 
-V0.1 готов, когда:
+V0.1 is ready when:
 
-- все десять rules реализованы и описаны;
-- CLI возвращает стабильные 0/1/2;
-- config, suppressions и baseline работают end-to-end;
-- stylish/JSON/SARIF outputs проверяются tests;
-- real-deck corpus откалиброван и результаты задокументированы;
-- core/CLI не требуют Office, LibreOffice, network или system-font scan;
-- security/performance tests пройдены;
-- packed-package smoke работает на clean consumer project;
-- README содержит только реально выполненные команды;
-- API/web/repair/rendering отсутствуют в v0.1 implementation.
+- all ten rules are implemented and documented;
+- the CLI returns stable codes 0/1/2;
+- config, suppressions, and baseline work end-to-end;
+- stylish/JSON/SARIF outputs are covered by tests;
+- the real-deck corpus is calibrated and results documented;
+- core/CLI require no Office, LibreOffice, network, or system-font scanning;
+- security/performance tests pass;
+- packed-package smoke works in a clean consumer project;
+- README contains only commands that have actually been executed;
+- API/web/repair/rendering are absent from the v0.1 implementation.

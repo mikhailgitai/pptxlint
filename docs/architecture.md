@@ -1,29 +1,29 @@
-# Архитектура pptxlint v0.1
+# pptxlint v0.1 architecture
 
-## 1. Решения верхнего уровня
+## 1. High-level decisions
 
-| Область     | Решение                                                   |
-| ----------- | --------------------------------------------------------- |
-| Runtime     | Node.js 22 or 24, TypeScript strict                       |
-| Workspace   | pnpm                                                      |
-| Packages    | `@pptxlint/core` и CLI package/binary `pptxlint`          |
-| Tests       | Vitest + synthetic PPTX fixture builder                   |
-| Config      | versioned JSON schema, без executable JS config           |
-| Output      | stylish, versioned JSON, SARIF 2.1.0                      |
-| Execution   | local/offline, без PowerPoint, LibreOffice и network      |
-| Persistence | только optional baseline JSON; PPTX никуда не загружается |
+| Area        | Decision                                                   |
+| ----------- | ---------------------------------------------------------- |
+| Runtime     | Node.js 22 or 24, TypeScript strict                        |
+| Workspace   | pnpm                                                       |
+| Packages    | `@pptxlint/core` and CLI package/binary `pptxlint`         |
+| Tests       | Vitest + synthetic PPTX fixture builder                    |
+| Config      | versioned JSON schema, no executable JS config             |
+| Output      | stylish, versioned JSON, SARIF 2.1.0                       |
+| Execution   | local/offline, without PowerPoint, LibreOffice, or network |
+| Persistence | optional baseline JSON only; PPTX files are never uploaded |
 
-ZIP и XML libraries скрываются за internal adapters; rule code не импортирует
-сторонний parser напрямую. Выбор `@zip.js/zip.js` и `@rgrove/parse-xml`, включая
-security settings и alternatives, зафиксирован в
+ZIP and XML libraries are wrapped by internal adapters; rule code never imports
+third-party parsers directly. The choice of `@zip.js/zip.js` and
+`@rgrove/parse-xml`, including security settings and alternatives, is recorded in
 [ADR 0001](adr/0001-zip-xml-adapters.md).
 
-Нормативные источники:
+Normative sources:
 
-- [ECMA-376, включая Open Packaging Conventions](https://ecma-international.org/publications-and-standards/standards/ecma-376/);
+- [ECMA-376, including Open Packaging Conventions](https://ecma-international.org/publications-and-standards/standards/ecma-376/);
 - [Microsoft: Structure of a PresentationML document](https://learn.microsoft.com/en-us/office/open-xml/presentation/structure-of-a-presentationml-document).
 
-## 2. Архитектурный поток
+## 2. Architectural flow
 
 ```mermaid
 flowchart LR
@@ -39,14 +39,14 @@ flowchart LR
   REPORT --> EXIT[Exit policy]
 ```
 
-Ключевое разделение:
+Separation of responsibilities:
 
-- core отвечает за parsing, modeling, rules, fingerprints и report data;
-- CLI отвечает за filesystem, config discovery, stdout/stderr и exit codes;
-- formatters получают готовый report и не пересчитывают findings;
-- baseline/suppressions меняют status finding, но не уничтожают raw evidence.
+- core owns parsing, modeling, rules, fingerprints, and report data;
+- CLI owns filesystem access, config discovery, stdout/stderr, and exit codes;
+- formatters receive a completed report and do not recompute findings;
+- baseline/suppressions change finding status without destroying raw evidence.
 
-## 3. Структура workspace
+## 3. Workspace structure
 
 ```text
 packages/
@@ -79,9 +79,9 @@ fixtures/
 docs/
 ```
 
-`packages/core` не импортирует CLI, filesystem temp APIs или terminal coloring.
-Core принимает bytes и validated config. CLI может зависеть от core, но не
-наоборот.
+`packages/core` does not import the CLI, filesystem temp APIs, or terminal
+coloring. Core accepts bytes and validated config. The CLI may depend on core,
+but core must not depend on the CLI.
 
 ## 4. Public core API
 
@@ -103,40 +103,40 @@ async function lintPptx(
 ): Promise<LintReport>;
 ```
 
-`displayPath` используется в report. `inputKey` — нормализованный относительный
-ключ для fingerprints/baseline. Абсолютный путь не попадает в deterministic
-output. Для входа вне current working directory CLI оставляет в `displayPath`
-только basename, а `inputKey` строит как
-`external/<sha256-normalized-relative-logical-path>/<basename>`. Это не
-раскрывает локальный путь, не объединяет разные внешние файлы с одинаковым
-basename и остаётся стабильным между checkout paths при одинаковой структуре
-относительно current working directory. Если filesystem не может построить
-relative path между разными volumes, CLI отклоняет input вместо включения
-machine-specific absolute path в key. В logical path нормализуется только
-separator текущей платформы; literal backslash, percent и colon внутри
-компонента кодируются до hashing, поэтому POSIX names `a\\b` и `a/b` не
-коллидируют.
+`displayPath` is used in the report. `inputKey` is a normalized relative key for
+fingerprints/baselines. Absolute paths are excluded from deterministic output.
+For inputs outside the current working directory, the CLI keeps only the
+basename in `displayPath` and constructs `inputKey` as
+`external/<sha256-normalized-relative-logical-path>/<basename>`. This conceals
+the local path, keeps distinct external files with identical basenames separate,
+and remains stable across checkout paths with the same structure relative to
+the current working directory. If the filesystem cannot construct a relative
+path between volumes, the CLI rejects the input instead of including a
+machine-specific absolute path in the key. Only the current platform's separator
+is normalized in the logical path; literal backslash, percent, and colon
+characters within a component are encoded before hashing, so POSIX names `a\\b`
+and `a/b` do not collide.
 
 ## 5. Package model
 
 ### 5.1 Canonical part names
 
-Внутреннее представление ZIP part name:
+Internal representation of a ZIP part name:
 
 ```text
 ppt/slides/slide1.xml
 ```
 
-Без начального `/`, только с `/` separator. Raw name сохраняется для evidence.
-Нормализация не должна скрывать duplicates или ambiguous names.
+No leading `/`; only `/` separators. The raw name is preserved as evidence.
+Normalization must not conceal duplicates or ambiguous names.
 
 Invalid entry:
 
 - absolute/drive-prefixed path;
 - backslash separator;
 - NUL;
-- traversal выше package root;
-- canonical conflict с ранее увиденным entry.
+- traversal above the package root;
+- canonical conflict with an entry already encountered.
 
 ### 5.2 ArchiveIndex
 
@@ -157,8 +157,8 @@ interface ArchiveIndex {
 }
 ```
 
-Entries индексируются одним проходом. Payload читается лениво и кешируется.
-Limits применяются до аллокации полного uncompressed buffer.
+Entries are indexed in one pass. Payloads are read lazily and cached.
+Limits apply before allocating the full uncompressed buffer.
 
 ### 5.3 XmlPartStore
 
@@ -173,34 +173,34 @@ interface XmlPartStore {
 }
 ```
 
-Parser namespace-aware, отклоняет DTD/entities и возвращает parse failure как
-data. Один part парсится не более одного раза за analysis.
+The parser is namespace-aware, rejects DTD/entities, and returns parse failures
+as data. Each part is parsed at most once per analysis.
 
 ### 5.4 RelationshipGraph
 
-Relationship хранит source part, `.rels` part, rId/type, target mode, raw target
-и resolved target. Internal target разрешается относительно source part по OPC.
-External target не fetch-ится.
+A relationship stores the source part, `.rels` part, rId/type, target mode, raw
+target, and resolved target. Internal targets are resolved relative to the source
+part according to OPC. External targets are never fetched.
 
-Incoming/outgoing indexes используются для missing-media и presentation
-traversal. `package/broken-relationship` исключает media relationship types,
-которые принадлежат специализированному rule.
+Incoming/outgoing indexes support missing-media checks and presentation
+traversal. `package/broken-relationship` excludes media relationship types,
+which belong to the specialized rule.
 
 ### 5.5 PresentationIndex
 
-- Slide order строится по `p:sldIdLst` + presentation relationships, а не по
-  именам `slide1.xml`.
-- Slide → layout → master → theme связи строятся через graph.
-- Slide number, persistent slide ID, part name и shape IDs доступны rules.
-- Missing/malformed prerequisite создаёт partial context и
-  `analysisComplete: false`, а не cascade exceptions.
+- Slide order follows `p:sldIdLst` + presentation relationships, not filenames
+  such as `slide1.xml`.
+- Slide → layout → master → theme links are built through the graph.
+- Slide number, persistent slide ID, part name, and shape IDs are available to rules.
+- Missing/malformed prerequisites produce partial context and
+  `analysisComplete: false` rather than cascading exceptions.
 
 ## 6. Geometry model
 
 ### 6.1 Coordinate system
 
-Source geometry хранится в EMU. Для transformed geometry используется affine
-matrix, но evidence сохраняет и EMU, и удобные points/ratios.
+Source geometry is stored in EMU. Transformed geometry uses an affine matrix,
+while evidence retains both EMU and convenient points/ratios.
 
 ```ts
 interface ShapeGeometry {
@@ -218,36 +218,36 @@ interface ShapeGeometry {
 
 ### 6.2 Transforms
 
-Resolver учитывает:
+The resolver accounts for:
 
 - shape offset/extent;
 - nested group `off/ext/chOff/chExt` transforms;
 - flips;
 - rotation;
-- placeholder geometry inheritance через slide → layout → master;
-- `p:cNvPr@hidden`, включая скрытые group subtrees;
-- slide size из presentation part.
+- placeholder geometry inheritance through slide → layout → master;
+- `p:cNvPr@hidden`, including hidden group subtrees;
+- slide size from the presentation part.
 
-Для rotated rectangles overlap/outside рассчитываются по transformed polygon,
-а не только по исходному axis-aligned box. Все pair IDs сортируются до
+For rotated rectangles, overlap/outside calculations use the transformed polygon
+rather than only the original axis-aligned box. All pair IDs are sorted before
 fingerprinting.
 
 ### 6.3 Scope v0.1
 
-Layout rules анализируют locally-authored shapes на slide. Inherited
-layout/master decorations индексируются для style resolution, но не участвуют в
-overlap/outside findings. Это снижает false positives и явно отражается в rule
-documentation.
+Layout rules analyze locally authored shapes on the slide. Inherited layout/master
+decorations are indexed for style resolution but do not participate in
+overlap/outside findings. This reduces false positives and is explicitly stated
+in rule documentation.
 
-`layout/text-occluded` оценивает перекрытие text-frame polygon, а не отдельных
-нарисованных glyphs. Message и evidence не должны называть этот результат
-pixel-perfect occlusion.
+`layout/text-occluded` evaluates coverage of the text-frame polygon rather than
+individual rendered glyphs. Messages and evidence must not describe this result
+as pixel-perfect occlusion.
 
 ## 7. Text and font resolution
 
 ### 7.1 EffectiveTextStyleResolver
 
-Resolver возвращает не только value, но и provenance:
+The resolver returns both the value and its provenance:
 
 ```ts
 type ResolvedValue<T> =
@@ -266,25 +266,25 @@ interface EffectiveRunStyle {
 }
 ```
 
-Style chain поддерживает задокументированные run/paragraph/list/shape,
-placeholder layout/master и presentation defaults. Theme placeholders
-разрешаются через reachable theme. Prefix XML namespace не используется как
-идентификатор — только namespace URI + local name.
+The style chain supports documented run/paragraph/list/shape, placeholder
+layout/master, and presentation defaults. Theme placeholders are resolved
+through the reachable theme. XML namespace prefixes are not used as identifiers;
+only namespace URI + local name are used.
 
-`fontScale` принимает обе нормативные lexical-формы: integer в тысячных долях
-процента и percent string с суффиксом `%`. Supplemental theme fonts выбираются
-по ISO 15924 script tag; для Han используются language metadata, а без них
-результат считается resolved только когда `Hans` и `Hant` заданы и указывают на
-один typeface. Наличие `themeOverride` relationship у slide или layout
-консервативно делает theme-placeholder result unresolved, пока объединение base
-theme с override не реализовано.
+`fontScale` accepts both normative lexical forms: an integer in thousandths of
+a percent and a percent string with a `%` suffix. Supplemental theme fonts are
+selected by ISO 15924 script tag. Han uses language metadata; without it, the
+result is resolved only when both `Hans` and `Hant` are defined and identify the
+same typeface. A `themeOverride` relationship on a slide or layout conservatively
+makes theme-placeholder results unresolved until merging the base theme with
+its override is implemented.
 
-Если chain неоднозначен или содержит неподдержанную конструкцию, resolver
-возвращает `unresolved`. Rule не подставляет условные 18pt или системный font.
+If the chain is ambiguous or contains an unsupported construct, the resolver
+returns `unresolved`. Rules do not substitute an arbitrary 18pt size or system font.
 
 ### 7.2 Autofit
 
-Состояния:
+States:
 
 ```ts
 type AutofitState =
@@ -294,22 +294,22 @@ type AutofitState =
   | { kind: "unknown"; reason: string };
 ```
 
-Если сохранённый scale присутствует и валиден, effective size вычисляется как
-resolved base size × normalized scale ratio. Нормализация raw OOXML units
-реализуется по спецификации и подтверждается fixtures, а не guessed constants.
+When a stored scale is present and valid, effective size is computed as resolved
+base size × normalized scale ratio. Raw OOXML units are normalized according to
+the specification and verified by fixtures, without guessed constants.
 
-Если runtime autofit включён, но persisted scale недоступен, создаётся только
-`text/autofit-enabled`. Text layout заново не симулируется.
+If runtime autofit is enabled but no persisted scale is available, only
+`text/autofit-enabled` is produced. Text layout is not simulated again.
 
 ### 7.3 Duplicate prevention
 
-- Run с below-minimum base size без usable autofit scale →
+- Run with a below-minimum base size and no usable autofit scale →
   `text/min-font-size`.
-- Run с base size выше minimum, но stored scale опускает effective size ниже →
-  `text/autofit-scale-below-minimum`.
-- Shape с runtime autofit без usable scale → `text/autofit-enabled`.
-- Для одного run/shape специализированный autofit finding имеет приоритет над
-  generic minimum finding.
+- Run with a base size above the minimum but a stored scale that reduces effective
+  size below it → `text/autofit-scale-below-minimum`.
+- Shape with runtime autofit and no usable scale → `text/autofit-enabled`.
+- For the same run/shape, the specialized autofit finding takes precedence over
+  the generic minimum finding.
 
 ## 8. Rule engine
 
@@ -330,31 +330,31 @@ interface PptxLintRule<Options> {
 }
 ```
 
-Engine выполняет:
+The engine performs:
 
 1. prerequisite check;
-2. rules в стабильном registry order;
+2. rules in stable registry order;
 3. canonical evidence/location;
 4. fingerprint generation;
 5. specialization deduplication;
 6. deterministic sort;
-7. severity override из config.
+7. severity override from config.
 
-Rule не читает filesystem, не открывает ZIP самостоятельно, не печатает output
-и не принимает решение об exit code.
+Rules do not read the filesystem, open ZIP archives independently, print output,
+or decide the exit code.
 
 ## 9. Configuration architecture
 
-V0.1 поддерживает только JSON:
+V0.1 supports JSON only:
 
 - explicit `--config path`;
-- иначе поиск `.pptxlintrc.json` от current working directory вверх;
-- один resolved config применяется ко всем input files команды;
+- otherwise, search upward from the current working directory for `.pptxlintrc.json`;
+- one resolved config applies to all input files in the command;
 - built-in preset `recommended`;
-- CLI `--fail-on` переопределяет config gate.
+- CLI `--fail-on` overrides the config gate.
 
-Config загружается и полностью валидируется до чтения PPTX. Unknown rule,
-unknown option или invalid severity возвращают exit code 2.
+Config is loaded and fully validated before reading PPTX files. Unknown rules,
+unknown options, or invalid severities return exit code 2.
 
 ```ts
 interface ResolvedRuleConfig<T> {
@@ -373,30 +373,30 @@ interface ResolvedConfig {
 
 ## 10. Suppressions
 
-Suppression matcher работает после raw rule results, но до baseline.
+The suppression matcher runs after raw rule results and before baseline comparison.
 
 Selectors v0.1:
 
 - rule ID;
 - input relative path, optional;
-- slide number или persistent slide ID, optional;
+- slide number or persistent slide ID, optional;
 - one or more shape IDs, optional;
 - part name, optional.
 
-Suppression должен содержать rule ID и хотя бы один location selector. Shape IDs
-и pair IDs canonicalized. Matching exact: regex/fuzzy text matching не
-поддерживается.
+A suppression must contain a rule ID and at least one location selector. Shape
+IDs and pair IDs are canonicalized. Matching is exact: regex/fuzzy text matching
+is unsupported.
 
-`ignore[].file` — raw logical path относительно CLI working directory. `/`
-всегда является portable separator, а `\` считается separator только на
-Windows; на POSIX это допустимый literal filename character. Config parser и
-CLI resolver использует общий `encodeInputKeyPath`: percent, colon и literal
-backslash кодируются как `%25`, `%3A` и `%5C` до exact matching. Пользователь
-не задаёт эти escape-последовательности вручную. CLI разрешает `..` для external
-inputs и передаёт в `resolveConfig` тот же filesystem-aware resolver, которым
-строит `inputKey` фактического input. Programmatic core API не выбирает platform
-separator неявно: при наличии `ignore[].file` caller обязан передать
-`ResolveConfigOptions.resolveFileInputKey`, возвращающий canonical `inputKey`.
+`ignore[].file` is a raw logical path relative to the CLI working directory. `/`
+is always a portable separator; `\` is a separator only on Windows and is a
+valid literal filename character on POSIX. The config parser and CLI resolver
+share `encodeInputKeyPath`: percent, colon, and literal backslash are encoded as
+`%25`, `%3A`, and `%5C` before exact matching. Users do not enter these escape
+sequences manually. The CLI resolves `..` for external inputs and passes
+`resolveConfig` the same filesystem-aware resolver used to construct the actual
+input's `inputKey`. The programmatic core API does not implicitly select a
+platform separator: when `ignore[].file` is present, the caller must provide
+`ResolveConfigOptions.resolveFileInputKey`, which returns the canonical `inputKey`.
 
 ```ts
 interface SuppressedFinding {
@@ -406,10 +406,10 @@ interface SuppressedFinding {
 }
 ```
 
-Unused suppressions возвращаются report metadata, чтобы конфиг не накапливал
-мёртвые исключения. Suppression с явным `file`, не совпадающим с текущим
-`inputKey`, находится вне scope этого input и не считается unused. В v0.1 они
-не являются отдельным lint finding.
+Unused suppressions are returned as report metadata to prevent obsolete
+exceptions from accumulating in config. A suppression with an explicit `file`
+that does not match the current `inputKey` is outside that input's scope and is
+not considered unused. In v0.1, unused suppressions are not separate lint findings.
 
 ## 11. Baseline model
 
@@ -428,21 +428,22 @@ interface BaselineV3 {
 }
 ```
 
-Baseline записывается после config suppressions. Сравнение является exact по
-fingerprint:
+The baseline is written after config suppressions. Comparison uses exact
+fingerprint matching:
 
 - current + baseline → existing;
 - current only → new;
 - baseline only → resolved.
 
-Только new findings участвуют в exit policy. Incompatible schema/tool major —
-явная config/baseline error. Baseline JSON сортируется детерминированно и не
-содержит extracted slide text. Reports с одинаковым `inputKey`, но разным
-source SHA-256 не объединяются. CLI проверяет filesystem identity baseline и
-входов через canonical path и device/inode, затем записывает baseline во
-временный файл в том же каталоге и атомарно заменяет destination через rename.
+Only new findings affect exit policy. An incompatible schema/tool major version
+is an explicit config/baseline error. Baseline JSON is sorted deterministically
+and excludes extracted slide text. Reports with the same `inputKey` but different
+source SHA-256 values are not merged. The CLI checks baseline and input filesystem
+identity through canonical paths and device/inode, then writes the baseline to
+a temporary file in the same directory and atomically replaces the destination
+using rename.
 
-## 12. Report и formatters
+## 12. Report and formatters
 
 ```ts
 interface LintReport {
@@ -462,24 +463,24 @@ interface LintReport {
 }
 ```
 
-Без `--debug` timings остаются пустыми, а peak RSS отсутствует, поэтому default
-machine output не получает нестабильные performance measurements. Debug mode
-агрегирует context/rule timings по всем inputs команды.
+Without `--debug`, timings remain empty and peak RSS is omitted, keeping unstable
+performance measurements out of default machine output. Debug mode aggregates
+context/rule timings across all inputs in the command.
 
-Formatters являются pure transformations:
+Formatters are pure transformations:
 
-- stylish пишет human output;
-- JSON сериализует versioned report contract;
-- SARIF преобразует findings, rules и fingerprints в SARIF 2.1.0.
+- stylish writes human-readable output;
+- JSON serializes the versioned report contract;
+- SARIF converts findings, rules, and fingerprints to SARIF 2.1.0.
 
 SARIF location:
 
 - `.pptx` path → physical artifact URI;
-- slide/shape → logical location и properties;
+- slide/shape → logical location and properties;
 - fingerprint → partial fingerprint.
 
-Поскольку `.pptx` — binary artifact, SARIF v0.1 не обещает line-level inline
-annotation или slide preview. Это задача будущего GitHub Check/App.
+Because `.pptx` is a binary artifact, SARIF v0.1 does not promise line-level inline
+annotations or slide previews. These belong to a future GitHub Check/App.
 
 ## 13. Exit policy
 
@@ -487,36 +488,36 @@ annotation или slide preview. Это задача будущего GitHub Che
 function determineExitCode(report: LintReport, failOn: Severity): 0 | 1 | 2;
 ```
 
-- Code 2 определяется command/config/input/internal errors вне normal report.
-- Code 1, если есть хотя бы один **new**, unsuppressed finding с severity на
-  уровне `failOn` или выше.
-- Existing baseline findings и suppressed findings не влияют на exit.
-- `analysisComplete: false` само по себе не меняет code, если причина уже
-  представлена gating или явно suppressed package finding. Suppressed finding
-  используется только как explanation и не становится gating. Необъяснённый
-  incomplete analysis — internal error/code 2.
+- Code 2 is determined by command/config/input/internal errors outside the normal report.
+- Code 1 applies when at least one **new**, unsuppressed finding has severity at
+  or above `failOn`.
+- Existing baseline findings and suppressed findings do not affect the exit code.
+- `analysisComplete: false` alone does not change the code if its cause is already
+  represented by a gating or explicitly suppressed package finding. A suppressed
+  finding serves only as an explanation and does not become gating. Unexplained
+  incomplete analysis is an internal error/code 2.
 
 ## 14. Determinism contract
 
-Одинаковые input bytes, resolved config, baseline и tool version должны давать:
+Identical input bytes, resolved config, baseline, and tool version must produce:
 
-- одинаковые rule results и fingerprints;
-- одинаковый порядок inputs/findings/evidence arrays;
-- одинаковый JSON/SARIF за исключением явно документированных timings;
-- одинаковый exit code.
+- identical rule results and fingerprints;
+- identical ordering of inputs/findings/evidence arrays;
+- identical JSON/SARIF except for explicitly documented timings;
+- identical exit codes.
 
-Запрещено включать в fingerprint/output defaults:
+Fingerprints and default output must exclude:
 
 - absolute filesystem paths;
-- ZIP enumeration order без canonical sort;
+- ZIP enumeration order without canonical sorting;
 - current timestamp;
 - locale-dependent number/string formatting;
-- случайные UUID;
+- random UUIDs;
 - system font inventory.
 
 ## 15. Security limits
 
-Defaults конфигурируются на уровне core, но не отключаются полностью:
+Defaults are configurable in core but cannot be disabled entirely:
 
 | Limit                            | Initial default |
 | -------------------------------- | --------------: |
@@ -526,28 +527,28 @@ Defaults конфигурируются на уровне core, но не отк
 | one XML part                     |          20 MiB |
 | compression ratio per entry      |           200:1 |
 
-Дополнительно:
+Additional requirements:
 
-- фактические распакованные bytes контролируются, а не только ZIP metadata;
-- DTD/entities запрещены;
-- external relationships не fetch-ятся;
-- path traversal не материализуется на filesystem;
-- logs/output не включают полный slide text по умолчанию;
-- input file остаётся read-only и никогда не перезаписывается.
+- enforce actual decompressed byte limits, not just ZIP metadata limits;
+- prohibit DTD/entities;
+- never fetch external relationships;
+- never materialize path traversal on the filesystem;
+- omit full slide text from logs/output by default;
+- keep input files read-only and never overwrite them.
 
 ## 16. Error boundaries
 
 - `CliUsageError`: invalid arguments, code 2.
 - `ConfigError`: config/schema/baseline invalid, code 2.
-- `UnsupportedInputError`: не ZIP/PPTX, encrypted или `.pptm`, code 2.
+- `UnsupportedInputError`: non-ZIP/PPTX, encrypted, or `.pptm` input, code 2.
 - `PackageFinding`: broken relationship/missing media/malformed XML, normal
   lint result.
-- `InternalError`: bug с concise stderr message; stack traces не входят в v0.1
-  CLI output.
+- `InternalError`: bug with a concise stderr message; stack traces are excluded
+  from v0.1 CLI output.
 
 ## 17. Deferred architecture
 
-Следующие компоненты не создаются в v0.1 workspace:
+The following components are not created in the v0.1 workspace:
 
 - API/web apps;
 - database/temp result storage;
@@ -556,5 +557,5 @@ Defaults конфигурируются на уровне core, но не отк
 - GitHub App/Check integration;
 - hosted organization policy/history.
 
-Core contracts проектируются так, чтобы эти consumers можно было добавить
-позже, но speculative abstractions под них не реализуются заранее.
+Core contracts are designed to allow these consumers to be added later, but
+speculative abstractions for them are not implemented in advance.

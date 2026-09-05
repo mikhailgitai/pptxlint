@@ -1,33 +1,33 @@
-# План реализации по Pull Requests
+# Implementation plan by Pull Request
 
-## 1. Правила нарезки
+## 1. Breakdown rules
 
-V0.1 состоит из десяти последовательно mergeable PR. Каждый PR оставляет main в
-зелёном состоянии, содержит tests/fixtures для своей функциональности и не
-добавляет web/API/repair/renderer scope.
+V0.1 consists of ten sequentially mergeable PRs. Each PR leaves main green,
+includes tests/fixtures for its functionality, and introduces no
+web/API/repair/renderer scope.
 
-Размер reviewable source diff без lockfile/generated fixtures:
+Reviewable source diff size, excluding the lockfile/generated fixtures:
 
-- **S** — до 350 строк;
-- **M** — 350–700 строк;
-- **L** — 700–1,200 строк.
+- **S** — up to 350 lines;
+- **M** — 350–700 lines;
+- **L** — 700–1,200 lines.
 
-PR больше 1,200 строк разделяется по adapter/model/rule boundary.
+PRs exceeding 1,200 lines are split at adapter/model/rule boundaries.
 
-## 2. Сводка
+## 2. Overview
 
-|  PR | Title                                            | Размер | Результат                         |
-| --: | ------------------------------------------------ | :----: | --------------------------------- |
-|  01 | Bootstrap workspace and CI                       |   M    | собираемые core/CLI packages      |
-|  02 | ZIP/XML adapters and fixture builder             |   L    | проверенные parser contracts      |
-|  03 | OPC and PresentationML context                   |   L    | shared package/presentation model |
-|  04 | Lint engine, config, package rules and CLI alpha |   L    | первая рабочая CLI-команда        |
-|  05 | Geometry engine, outside-slide and text-overlap  |   L    | первые layout rules               |
-|  06 | High-confidence text occlusion                   |   M    | z-order/opacity occlusion rule    |
-|  07 | Text styles, autofit and font policy             |   L    | typography rules complete         |
-|  08 | Suppressions and baseline mode                   |   M    | adoption на legacy decks          |
-|  09 | JSON/SARIF and package UX                        |   M    | CI beta                           |
-|  10 | Security, corpus calibration and v0.1 release    |   M    | release candidate                 |
+|  PR | Title                                            | Size | Outcome                           |
+| --: | ------------------------------------------------ | :--: | --------------------------------- |
+|  01 | Bootstrap workspace and CI                       |  M   | buildable core/CLI packages       |
+|  02 | ZIP/XML adapters and fixture builder             |  L   | verified parser contracts         |
+|  03 | OPC and PresentationML context                   |  L   | shared package/presentation model |
+|  04 | Lint engine, config, package rules and CLI alpha |  L   | first working CLI command         |
+|  05 | Geometry engine, outside-slide and text-overlap  |  L   | first layout rules                |
+|  06 | High-confidence text occlusion                   |  M   | z-order/opacity occlusion rule    |
+|  07 | Text styles, autofit and font policy             |  L   | typography rules complete         |
+|  08 | Suppressions and baseline mode                   |  M   | adoption for legacy decks         |
+|  09 | JSON/SARIF and package UX                        |  M   | CI beta                           |
+|  10 | Security, corpus calibration and v0.1 release    |  M   | release candidate                 |
 
 ## 3. Dependency graph
 
@@ -45,8 +45,8 @@ flowchart TD
   P09 --> P10[PR 10 Release]
 ```
 
-PR 06 и PR 07 можно готовить независимо после merge PR 05/PR 04 соответственно,
-но оба должны войти до PR 08.
+PR 06 and PR 07 can be prepared independently after PR 05 and PR 04 are merged,
+respectively, but both must be merged before PR 08.
 
 ## 4. PR 01 — Bootstrap workspace and CI
 
@@ -58,20 +58,20 @@ chore: bootstrap pptxlint workspace and CI
 
 ### Scope
 
-- pnpm workspace, pinned package manager и Node 22;
+- pnpm workspace, pinned package manager, and Node 22;
 - TypeScript strict, ESLint, Prettier, Vitest;
-- `packages/core` и `packages/cli` skeletons;
-- CLI binary wiring без lint functionality;
-- root scripts и CI;
-- package metadata: `private: true`, `license: UNLICENSED` до решения о релизе;
-- `.gitignore`, `.editorconfig` и current README links.
+- `packages/core` and `packages/cli` skeletons;
+- CLI binary wiring without lint functionality;
+- root scripts and CI;
+- package metadata: `private: true`, `license: UNLICENSED` until the release decision;
+- `.gitignore`, `.editorconfig`, and current README links.
 
 ### Merge criteria
 
-- format/lint/typecheck/test/build проходят на clean checkout;
-- CLI `--help` запускается;
-- dependency direction CLI → core проверяется;
-- нет Fastify/React/database/rendering dependencies.
+- format/lint/typecheck/test/build pass on a clean checkout;
+- CLI `--help` runs;
+- dependency direction CLI → core is verified;
+- no Fastify/React/database/rendering dependencies.
 
 ### Non-goals
 
@@ -89,14 +89,14 @@ feat(core): add safe ZIP and XML adapters with PPTX fixtures
 
 ### Scope
 
-- internal ZIP reader interface с lazy entries и size metadata;
+- internal ZIP reader interface with lazy entries and size metadata;
 - duplicate entry visibility;
 - namespace-aware XML parse adapter;
 - strict malformed XML result;
 - DTD/entity rejection;
 - synthetic minimal PPTX builder;
-- raw ZIP helper для intentionally invalid fixtures;
-- ADR с library decision.
+- raw ZIP helper for intentionally invalid fixtures;
+- ADR documenting the library decision.
 
 ### Fixtures/tests
 
@@ -109,15 +109,15 @@ feat(core): add safe ZIP and XML adapters with PPTX fixtures
 
 ### Merge criteria
 
-- adapter contract tests не зависят от rules;
-- duplicate names не молча overwrite-ятся;
-- XML parser не выполняет filesystem/network resolution;
-- fixture generator воспроизводим.
+- adapter contract tests are independent of rules;
+- duplicate names are not silently overwritten;
+- the XML parser performs no filesystem/network resolution;
+- fixture generation is reproducible.
 
 ### Non-goals
 
 - relationships/content types;
-- config и findings;
+- config and findings;
 - package mutation/writer.
 
 ## 6. PR 03 — OPC and PresentationML context
@@ -130,14 +130,14 @@ feat(core): build safe OPC and PresentationML context
 
 ### Scope
 
-- canonical part paths и traversal detection;
-- `ArchiveIndex`, `XmlPartStore` и security limits;
+- canonical part paths and traversal detection;
+- `ArchiveIndex`, `XmlPartStore`, and security limits;
 - content-type index;
-- root/part relationship resolution и graph;
-- slide order и slide/layout/master/theme chain;
-- local slide shape inventory и z-order;
+- root/part relationship resolution and graph;
+- slide order and slide/layout/master/theme chain;
+- local slide shape inventory and z-order;
 - partial context/prerequisite diagnostics;
-- SHA-256 и normalized input key.
+- SHA-256 and normalized input key.
 
 ### Tests
 
@@ -147,14 +147,14 @@ feat(core): build safe OPC and PresentationML context
 - missing layout/master/media nodes;
 - malformed relationship/content-types parts;
 - read/parse cache counters;
-- path traversal и size-limit cases.
+- path traversal and size-limit cases.
 
 ### Merge criteria
 
-- context не предполагает последовательные ZIP names;
-- один malformed part не обрывает доступные indexes;
-- один part читается/парсится максимум один раз;
-- core не читает filesystem напрямую.
+- context does not assume sequential ZIP names;
+- one malformed part does not interrupt available indexes;
+- each part is read/parsed at most once;
+- core does not read the filesystem directly.
 
 ### Non-goals
 
@@ -173,9 +173,9 @@ feat: add deterministic lint engine and package rules
 ### Scope
 
 - finding/location/evidence/report contracts;
-- deterministic fingerprint и sort;
+- deterministic fingerprints and sorting;
 - prerequisite-aware rule registry;
-- JSON config schema и `recommended` preset;
+- JSON config schema and `recommended` preset;
 - rule severity/options validation;
 - exit policy 0/1/2;
 - rules:
@@ -195,11 +195,11 @@ feat: add deterministic lint engine and package rules
 
 ### Merge criteria
 
-- `pptxlint fixture.pptx` работает end-to-end;
-- missing media не дублируется broken-relationship finding;
-- package finding содержит exact part/rId/target evidence;
-- malformed XML не становится unexplained code 2;
-- valid minimal fixture возвращает code 0.
+- `pptxlint fixture.pptx` works end-to-end;
+- missing media does not produce a duplicate broken-relationship finding;
+- package findings contain exact part/rId/target evidence;
+- malformed XML does not become an unexplained code 2;
+- a valid minimal fixture returns code 0.
 
 ### Non-goals
 
@@ -207,7 +207,7 @@ feat: add deterministic lint engine and package rules
 - suppressions/baseline;
 - JSON/SARIF public formatter.
 
-После merge достигается **CLI alpha**.
+Merging this PR achieves **CLI alpha**.
 
 ## 8. PR 05 — Geometry engine, outside-slide and text-overlap
 
@@ -220,13 +220,13 @@ feat(core): detect off-slide and overlapping text geometry
 ### Scope
 
 - EMU affine matrix primitives;
-- nested group transforms, scaling, flips и rotation;
+- nested group transforms, scaling, flips, and rotation;
 - transformed polygons/bounds;
 - polygon intersection/slide clipping;
 - text-bearing shape model;
 - `layout/outside-slide`;
 - `layout/text-overlap`;
-- config thresholds и evidence.
+- config thresholds and evidence.
 
 ### Fixtures/tests
 
@@ -239,10 +239,10 @@ feat(core): detect off-slide and overlapping text geometry
 
 ### Merge criteria
 
-- group/rotation math проверяется pure unit tests;
-- pair не создаётся дважды;
-- evidence содержит bounds, intersection и ratio;
-- error message не обещает rendered glyph collision.
+- group/rotation math is verified by pure unit tests;
+- pairs are not created twice;
+- evidence includes bounds, intersection, and ratio;
+- error messages do not claim rendered glyph collisions.
 
 ### Non-goals
 
@@ -279,10 +279,10 @@ feat(core): detect text occluded by opaque foreground shapes
 
 ### Merge criteria
 
-- unknown transparency не создаёт high-confidence finding;
-- z-order учитывается;
-- evidence объясняет opacity basis;
-- rule называет text-frame coverage, не pixel-perfect hidden glyphs.
+- unknown transparency does not produce a high-confidence finding;
+- z-order is respected;
+- evidence explains the opacity basis;
+- the rule describes text-frame coverage rather than pixel-perfect hidden glyphs.
 
 ### Non-goals
 
@@ -300,9 +300,9 @@ feat(core): lint effective text sizes, autofit, and allowed fonts
 
 ### Scope
 
-- effective style resolver с provenance;
+- effective style resolver with provenance;
 - run/paragraph/list/placeholder/layout/master inheritance;
-- theme font resolution для script slots;
+- theme font resolution for script slots;
 - title/body classification;
 - stored autofit scale normalization;
 - rules:
@@ -324,10 +324,10 @@ feat(core): lint effective text sizes, autofit, and allowed fonts
 
 ### Merge criteria
 
-- вычисленный size появляется только при resolved base + valid scale;
-- runtime autofit получает uncertainty warning, не guessed point size;
-- `fonts/allowed` off без allowlist;
-- evidence содержит provenance.
+- computed size appears only with a resolved base + valid scale;
+- runtime autofit produces an uncertainty warning rather than a guessed point size;
+- `fonts/allowed` is off without an allowlist;
+- evidence includes provenance.
 
 ### Non-goals
 
@@ -335,7 +335,7 @@ feat(core): lint effective text sizes, autofit, and allowed fonts
 - font-file metrics/system inventory;
 - font substitution.
 
-После merge все десять v0.1 rules реализованы.
+After merging, all ten v0.1 rules are implemented.
 
 ## 11. PR 08 — Suppressions and baseline mode
 
@@ -349,8 +349,8 @@ feat: add exact suppressions and legacy-deck baselines
 
 - config `ignore` schema;
 - exact rule/file/slide/shape/part matching;
-- canonical pair IDs и optional reasons;
-- suppression summary и unused metadata;
+- canonical pair IDs and optional reasons;
+- suppression summary and unused metadata;
 - baseline schema/write/read;
 - new/existing/resolved classification;
 - baseline-aware exit policy;
@@ -369,10 +369,10 @@ feat: add exact suppressions and legacy-deck baselines
 
 ### Merge criteria
 
-- baseline JSON детерминирован и не содержит slide text/absolute paths;
+- baseline JSON is deterministic and excludes slide text/absolute paths;
 - only new findings gate CI;
-- unused suppression видим, но не создаёт новый rule ID;
-- processing order совпадает с product spec.
+- unused suppressions are visible without introducing a new rule ID;
+- processing order matches the product specification.
 
 ### Non-goals
 
@@ -393,7 +393,7 @@ feat(cli): add JSON and SARIF CI output
 - final stylish formatter;
 - versioned JSON schema/formatter;
 - SARIF 2.1.0 rules/results;
-- artifact URI, logical slide/shape locations и partial fingerprints;
+- artifact URI, logical slide/shape locations, and partial fingerprints;
 - multi-file report aggregation;
 - `--format`, `--output-file`, `--fail-on`;
 - stdout/stderr discipline;
@@ -402,19 +402,19 @@ feat(cli): add JSON and SARIF CI output
 
 ### Tests
 
-- JSON schema validation и snapshots;
+- JSON schema validation and snapshots;
 - SARIF schema/snapshots;
 - Windows/POSIX path normalization;
 - multi-file mixed code 0/1;
-- machine output без ANSI;
-- install tarball в temporary consumer project.
+- machine output without ANSI;
+- tarball installation in a temporary consumer project.
 
 ### Merge criteria
 
-- `npx pptxlint deck.pptx` работает из packed local tarball;
-- SARIF содержит все rule descriptors и logical locations;
-- документация честно отмечает binary-artifact limitation;
-- stdout содержит только выбранный format.
+- `npx pptxlint deck.pptx` works from a packed local tarball;
+- SARIF contains all rule descriptors and logical locations;
+- documentation clearly states the binary-artifact limitation;
+- stdout contains only the selected format.
 
 ### Non-goals
 
@@ -422,7 +422,7 @@ feat(cli): add JSON and SARIF CI output
 - slide thumbnails/deep links;
 - npm public publish.
 
-После merge достигается **CI beta**.
+Merging this PR achieves **CI beta**.
 
 ## 13. PR 10 — Security, corpus calibration and v0.1 release
 
@@ -437,30 +437,30 @@ chore: harden pptxlint and prepare v0.1 release
 - ZIP bomb/path traversal/DTD/external-target regression suite;
 - actual-vs-declared byte limits;
 - 50 MiB/100-slide performance benchmark;
-- aggregate rule timings и peak RSS evidence;
-- calibration минимум на 30 real decks из трёх source families;
-- false-positive review и default severity/threshold adjustment;
-- final docs, limitations и changelog;
-- version `0.1.0` без public publication, если лицензия ещё не выбрана.
+- aggregate rule timings and peak RSS evidence;
+- calibration on at least 30 real decks from three source families;
+- false-positive review and default severity/threshold adjustment;
+- final docs, limitations, and changelog;
+- version `0.1.0` without public publication if the license has not yet been selected.
 
 ### Merge criteria
 
-- all CI gates green на clean checkout;
-- default error layout rules достигают целевого 90% precision на размеченном
-  corpus либо сужены/понижены;
-- proprietary decks не коммитятся;
-- README содержит только executed commands;
-- ни один v0.1 non-goal не появился скрыто;
-- release evidence включает analyze examples, baseline flow и SARIF artifact.
+- all CI gates pass on a clean checkout;
+- default error layout rules achieve the target 90% precision on the labeled
+  corpus or are narrowed/downgraded;
+- proprietary decks are not committed;
+- README contains only executed commands;
+- no v0.1 non-goals have been introduced implicitly;
+- release evidence includes analysis examples, baseline flow, and a SARIF artifact.
 
 ### Non-goals
 
-- новые rules;
+- new rules;
 - auto-fix;
 - cloud/API/web/rendering;
-- billing и organization features.
+- billing and organization features.
 
-После merge достигается **v0.1 release candidate**.
+Merging this PR achieves a **v0.1 release candidate**.
 
 ## 14. PR 11 — Public beta distribution
 
@@ -470,34 +470,34 @@ Title:
 chore: prepare pptxlint for public beta distribution
 ```
 
-PR 11 переводит private `v0.1.0` release candidate в публикуемый `v0.1.1`, не
-добавляя product features. Canonical scope, release invariants, ручные
-owner-only операции, registry smoke, 30-дневный adoption experiment и v0.2 gate
-зафиксированы в [public-beta-plan.md](public-beta-plan.md).
+PR 11 takes the private `v0.1.0` release candidate to a publishable `v0.1.1`
+without adding product features. Canonical scope, release invariants, manual
+owner-only operations, registry smoke, the 30-day adoption experiment, and the
+v0.2 gate are defined in [public-beta-plan.md](public-beta-plan.md).
 
 ### Merge criteria
 
-- Apache-2.0 и public package metadata готовы;
-- root workspace остаётся private;
-- Node.js 22/24 matrix зелёная;
-- packed manifests не содержат `workspace:*` и ссылаются на exact published
+- Apache-2.0 and public package metadata are ready;
+- the root workspace remains private;
+- the Node.js 22/24 matrix passes;
+- packed manifests contain no `workspace:*` references and use the exact published
   `@pptxlint/core` version;
-- tarballs содержат README/LICENSE/schemas и не содержат `.tsbuildinfo`;
-- English README, три recipes и public broken-deck example проверяются в CI;
-- release workflow готов к OIDC publication после manual prerelease bootstrap;
-- исторический `v0.1.0` tag не изменяется и остаётся только в private archive.
+- tarballs include README/LICENSE/schemas and exclude `.tsbuildinfo`;
+- the English README, three recipes, and public broken-deck example are verified in CI;
+- the release workflow is ready for OIDC publication after manual prerelease bootstrap;
+- the historical `v0.1.0` tag remains unchanged and exists only in the private archive.
 
 ### Non-goals
 
-- новые rules;
+- new rules;
 - rendering/repair/web/API/App;
 - Pro Engine;
-- telemetry и billing.
+- telemetry and billing.
 
-После merge достигается **public-beta release readiness**. npm organization,
-2FA, copyright-owner selection, manual `0.1.1-beta.0@next`, переключение
-репозитория в public, trusted-publisher configuration и `v0.1.1@latest` являются
-отдельными owner-operated release steps.
+Merging this PR achieves **public-beta release readiness**. The npm organization,
+2FA, copyright-owner selection, manual `0.1.1-beta.0@next`, making the repository
+public, trusted-publisher configuration, and `v0.1.1@latest` are separate
+owner-operated release steps.
 
 ## 15. Rule ownership matrix
 
@@ -518,23 +518,23 @@ owner-only операции, registry smoke, 30-дневный adoption experime
 
 ## 16. Merge policy
 
-- Каждый PR squash-mergerится с указанным conventional title.
-- Rule не merge-ится без positive/negative/malformed-prerequisite fixtures.
-- Config/report schema change обновляет schema tests и docs в том же PR.
-- Geometry formula сопровождается pure unit tests и source/spec note.
-- TODO допустим только вместе с conservative no-finding/no-guess behavior.
-- Generated fixtures/snapshots воспроизводимы и не скрывают reviewable logic.
-- Repair/API/web/rendering dependencies запрещены до завершения 30-дневного
-  public-beta experiment и выбора evidence-backed направления v0.2.
+- Each PR is squash-merged with the specified conventional title.
+- Rules are not merged without positive/negative/malformed-prerequisite fixtures.
+- Config/report schema changes update schema tests and docs in the same PR.
+- Geometry formulas include pure unit tests and a source/spec note.
+- TODOs are allowed only with conservative no-finding/no-guess behavior.
+- Generated fixtures/snapshots are reproducible and do not conceal reviewable logic.
+- Repair/API/web/rendering dependencies are prohibited until the 30-day
+  public-beta experiment is complete and an evidence-backed v0.2 direction is selected.
 
 ## 17. PR evidence template
 
-Каждый PR показывает:
+Each PR shows:
 
-1. зачем изменение нужно пользователю или следующему architectural layer;
-2. exact scope и explicit non-goals;
-3. test commands и результаты;
+1. why the user or next architectural layer needs the change;
+2. exact scope and explicit non-goals;
+3. test commands and results;
 4. fixture before/expected finding;
-5. OOXML/spec basis для нового parsing/geometry behavior;
+5. the OOXML/spec basis for new parsing/geometry behavior;
 6. determinism/security/false-positive risks;
-7. CLI output, если PR меняет user-visible behavior.
+7. CLI output when the PR changes user-visible behavior.

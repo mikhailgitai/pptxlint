@@ -1,49 +1,49 @@
-# Спецификация pptxlint v0.1
+# pptxlint v0.1 specification
 
-## 1. Позиционирование
+## 1. Positioning
 
 > **pptxlint — ESLint for generated PowerPoint.**
 >
 > Catch broken layout, invalid OOXML, and presentation-policy violations before
 > the deck ships.
 
-`pptxlint` проверяет итоговый `.pptx`, созданный программой или AI-агентом, до
-передачи клиенту или публикации CI artifact. Он не оценивает содержание и
-эстетику презентации: он выявляет воспроизводимые структурные, геометрические и
-policy-проблемы.
+`pptxlint` checks the final `.pptx` created by a program or AI agent before it is
+delivered to a client or published as a CI artifact. It identifies reproducible
+structural, geometric, and policy issues; it does not evaluate presentation
+content or aesthetics.
 
-Основной пользователь — разработчик или команда, которые массово генерируют
-PowerPoint через `python-pptx`, PptxGenJS, Open XML, Codex, Claude или внутренний
+The primary user is a developer or team generating PowerPoint files at scale
+with `python-pptx`, PptxGenJS, Open XML, Codex, Claude, or an internal
 presentation pipeline.
 
-## 2. Критерий успеха v0.1
+## 2. v0.1 success criterion
 
 ```bash
 npx pptxlint generated.pptx
 # exits 1 and tells me exactly why
 ```
 
-Инструмент считается полезным, если он:
+The tool is useful if it:
 
-- запускается локально одной командой;
-- не требует PowerPoint, LibreOffice, аккаунта или network access;
-- называет rule, slide, shape и измеримое evidence;
-- стабильно работает в CI;
-- допускает intentional exceptions;
-- позволяет включить lint для legacy deck без немедленного исправления сотен
-  старых findings.
+- runs locally with one command;
+- requires no PowerPoint, LibreOffice, account, or network access;
+- identifies the rule, slide, shape, and measurable evidence;
+- works reliably in CI;
+- allows intentional exceptions;
+- supports linting a legacy deck without immediately fixing hundreds of existing
+  findings.
 
-## 3. Принципы продукта
+## 3. Product principles
 
 ### 3.1 Determinism over simulation
 
-Линтер анализирует только факты, сохранённые в OOXML, и однозначные производные
-от них. Он не утверждает, что знает итоговую раскладку PowerPoint, если она
-зависит от недоступных font metrics или конкретного rendering engine.
+The linter analyzes only facts stored in OOXML and unambiguous values derived
+from them. It does not claim to know the final PowerPoint layout when that
+depends on unavailable font metrics or a specific rendering engine.
 
 ### 3.2 Evidence, not vague advice
 
-Finding сообщает вычисленное значение и применённый threshold:
+A finding reports the computed value and the applied threshold:
 
 ```text
 Stored fontScale results in effective size 8.4pt.
@@ -52,7 +52,7 @@ Configured minimum: 12pt.
 
 ### 3.3 Developer experience is the moat
 
-V0.1 конкурирует не количеством rules, а совокупностью:
+V0.1 competes through a combination of capabilities rather than rule count:
 
 - local/offline execution;
 - predictable configuration;
@@ -60,34 +60,34 @@ V0.1 конкурирует не количеством rules, а совокуп
 - suppressions;
 - baselines;
 - SARIF/CI integration;
-- быстрым анализом без открытия PowerPoint.
+- fast analysis without opening PowerPoint.
 
-## 4. Scope и non-goals
+## 4. Scope and non-goals
 
-### Входит в v0.1
+### Included in v0.1
 
-- один или несколько локальных `.pptx` inputs;
-- десять rule IDs из раздела 7;
-- CLI и programmatic `@pptxlint/core`;
-- конфигурация JSON;
+- one or more local `.pptx` inputs;
+- the ten rule IDs in section 7;
+- CLI and programmatic `@pptxlint/core`;
+- JSON configuration;
 - suppressions;
 - baseline workflow;
-- human-readable, JSON и SARIF output;
-- synthetic fixtures и integration tests.
+- human-readable, JSON, and SARIF output;
+- synthetic fixtures and integration tests.
 
-### Не входит в v0.1
+### Excluded from v0.1
 
-- web UI и REST API;
-- cloud upload, accounts и organization policies;
+- web UI and REST API;
+- cloud upload, accounts, and organization policies;
 - repair/auto-fix;
-- slide rendering, screenshots и visual diff;
-- AI-анализ содержания или дизайна;
+- slide rendering, screenshots, and visual diff;
+- AI analysis of content or design;
 - health score;
 - font substitution;
-- попытка полностью воспроизвести PowerPoint text layout;
-- проверка внешних URLs;
-- `.pptm`, encrypted и password-protected files;
-- npm publication до отдельного решения о лицензии и package ownership.
+- attempts to fully reproduce PowerPoint text layout;
+- external URL checks;
+- `.pptm`, encrypted, and password-protected files;
+- npm publication before a separate license and package ownership decision.
 
 ## 5. CLI contract
 
@@ -104,24 +104,24 @@ pptxlint legacy-deck.pptx --write-baseline .pptxlint-baseline.json
 pptxlint legacy-deck.pptx --baseline .pptxlint-baseline.json
 ```
 
-V0.1 принимает явные file paths. Самостоятельное recursive directory scanning и
-shell-independent glob expansion можно добавить позже.
+V0.1 accepts explicit file paths. Recursive directory scanning and
+shell-independent glob expansion may be added later.
 
 ### 5.2 Exit codes
 
-| Code | Значение                                                                                   |
-| ---: | ------------------------------------------------------------------------------------------ |
-|  `0` | нет новых unsuppressed findings на уровне `failOn` или выше                                |
-|  `1` | найден хотя бы один новый unsuppressed gating finding                                      |
-|  `2` | invalid arguments/config, unreadable input, unsupported или non-ZIP file, internal failure |
+| Code | Meaning                                                                                   |
+| ---: | ----------------------------------------------------------------------------------------- |
+|  `0` | no new unsuppressed findings at or above `failOn`                                         |
+|  `1` | at least one new unsuppressed gating finding                                              |
+|  `2` | invalid arguments/config, unreadable input, unsupported or non-ZIP file, internal failure |
 
-Повреждённый XML внутри распознаваемого OPC/PPTX package является lint finding,
-а не code 2, если analyzer способен безопасно построить partial report.
+Malformed XML inside a recognizable OPC/PPTX package is a lint finding, rather
+than code 2, when the analyzer can safely produce a partial report.
 
 ### 5.3 Default gate
 
-По умолчанию `failOn` равен `error`. Warnings печатаются, но не меняют exit code.
-CLI `--fail-on warning` или соответствующий config делают warnings gating.
+The default `failOn` is `error`. Warnings are printed but do not change the exit
+code. CLI `--fail-on warning` or the corresponding config makes warnings gating.
 
 ## 6. Finding model
 
@@ -151,126 +151,124 @@ interface PptxFinding {
 
 ### 6.1 Stable fingerprint
 
-Fingerprint строится из:
+The fingerprint is built from:
 
 - major schema version;
 - `ruleId`;
 - canonical input key;
 - canonical part/slide identity;
-- отсортированных shape IDs;
-- стабильного semantic discriminator правила.
+- sorted shape IDs;
+- the rule's stable semantic discriminator.
 
-Message text, severity, абсолютный filesystem path и измеренное значение не
-входят в fingerprint. Иначе изменение формулировки или процента overlap сломает
-baseline.
+Message text, severity, absolute filesystem path, and measured values are
+excluded from the fingerprint. Otherwise, changing wording or an overlap
+percentage would invalidate the baseline.
 
-Ограничение v0.1: если generator пересоздаёт slide/shape IDs при каждом запуске,
-baseline может churn-иться. Это явно документируется; fuzzy matching не входит
-в первый релиз.
+V0.1 limitation: a generator that recreates slide/shape IDs on every run may
+cause baseline churn. This is explicitly documented; fuzzy matching is outside
+the first release.
 
 ## 7. Rules v0.1
 
-| Rule ID                            | Default | Назначение                                                           |
-| ---------------------------------- | ------: | -------------------------------------------------------------------- |
-| `package/broken-relationship`      |   error | internal non-media relationship указывает на отсутствующий part      |
-| `package/missing-media`            |   error | image/audio/video relationship указывает на отсутствующий media part |
-| `package/malformed-xml`            |   error | XML part не является well-formed XML                                 |
-| `layout/outside-slide`             | warning | локальный slide shape выходит за границы slide сверх tolerance       |
-| `layout/text-overlap`              | warning | два непустых text-bearing shapes существенно пересекаются            |
-| `layout/text-occluded`             |     off | более поздний opaque shape закрывает текст                           |
-| `text/min-font-size`               |   error | сохранённый/resolved effective font size ниже policy                 |
-| `text/autofit-scale-below-minimum` |   error | сохранённый `fontScale` уменьшает effective size ниже policy         |
-| `text/autofit-enabled`             | warning | runtime autofit включён, но итоговый размер нельзя доказать из OOXML |
-| `fonts/allowed`                    |   error | resolved font отсутствует в configured allowlist                     |
+| Rule ID                            | Default | Purpose                                                               |
+| ---------------------------------- | ------: | --------------------------------------------------------------------- |
+| `package/broken-relationship`      |   error | an internal non-media relationship targets a missing part             |
+| `package/missing-media`            |   error | an image/audio/video relationship targets a missing media part        |
+| `package/malformed-xml`            |   error | an XML part is not well-formed XML                                    |
+| `layout/outside-slide`             | warning | a local slide shape extends beyond slide bounds past the tolerance    |
+| `layout/text-overlap`              | warning | two nonempty text-bearing shapes overlap substantially                |
+| `layout/text-occluded`             |     off | a later opaque shape covers text                                      |
+| `text/min-font-size`               |   error | stored/resolved effective font size is below policy                   |
+| `text/autofit-scale-below-minimum` |   error | stored `fontScale` reduces effective size below policy                |
+| `text/autofit-enabled`             | warning | runtime autofit is enabled, but OOXML cannot establish the final size |
+| `fonts/allowed`                    |   error | a resolved font is absent from the configured allowlist               |
 
 ### 7.1 `package/broken-relationship`
 
-- Проверяются только internal targets.
-- External targets индексируются, но не загружаются и не проверяются на
-  доступность.
-- Missing media relationship принадлежит `package/missing-media` и не создаёт
-  второй finding.
+- Only internal targets are checked.
+- External targets are indexed but never downloaded or checked for availability.
+- Missing media relationships belong to `package/missing-media` and do not
+  generate a second finding.
 - Evidence: source part, relationship part, rId, relationship type, raw target,
   resolved target.
 
 ### 7.2 `package/missing-media`
 
-- Включает известные image, audio и video relationship types.
-- Не пытается найти, скачать или сгенерировать replacement.
-- Evidence дополнительно содержит media kind и referencing slide, если её можно
-  определить.
+- Covers known image, audio, and video relationship types.
+- Does not attempt to find, download, or generate replacements.
+- Evidence also includes media kind and the referencing slide, when identifiable.
 
 ### 7.3 `package/malformed-xml`
 
-- XML inventory определяется через content types и известные OOXML part types.
-- Один malformed part создаёт один finding и кешированный parse failure.
-- DTD и external entities запрещены.
-- Rules с недоступным prerequisite пропускаются; report помечается
+- The XML inventory is derived from content types and known OOXML part types.
+- Each malformed part produces one finding and a cached parse failure.
+- DTD and external entities are prohibited.
+- Rules with unavailable prerequisites are skipped; the report is marked
   `analysisComplete: false`.
 
 ### 7.4 `layout/outside-slide`
 
-- Геометрия вычисляется в EMU с применением nested group transforms и rotation.
-- Сравнивается transformed visible polygon/bounding box с slide rectangle.
-- Evidence: bbox, outside edges, outside area ratio и tolerance.
-- По умолчанию проверяются locally-authored slide shapes; inherited master/layout
-  decorations не создают findings v0.1.
-- Intentional bleed подавляется config suppression.
+- Geometry is computed in EMU, applying nested group transforms and rotation.
+- The transformed visible polygon/bounding box is compared with the slide rectangle.
+- Evidence: bbox, outside edges, outside area ratio, and tolerance.
+- By default, locally authored slide shapes are checked; inherited master/layout
+  decorations do not produce v0.1 findings.
+- Intentional bleed is handled with a config suppression.
 
 ### 7.5 `layout/text-overlap`
 
-- После real-deck calibration правило понижено до warning: text-frame geometry
-  без renderer/font metrics недостаточно точна для default error.
-- Проверяются пары locally-authored shapes с непустым visible text.
-- Pair canonicalized по shape ID, чтобы не создавать A→B и B→A.
-- Threshold задаётся как intersection area / area меньшего transformed text box.
-- Table cells внутри одной table, shape и его own children не сравниваются как
-  независимые text boxes.
-- Evidence: обе locations, intersection area и overlap ratio.
+- Real-deck calibration downgraded this rule to warning: text-frame geometry
+  without a renderer/font metrics is insufficiently precise for a default error.
+- Checks pairs of locally authored shapes with nonempty visible text.
+- Pairs are canonicalized by shape ID to avoid reporting both A→B and B→A.
+- The threshold is intersection area / area of the smaller transformed text box.
+- Cells within the same table, and a shape and its own children, are not compared
+  as independent text boxes.
+- Evidence: both locations, intersection area, and overlap ratio.
 
 ### 7.6 `layout/text-occluded`
 
-- После real-deck calibration правило выключено по умолчанию; пользователь
-  может явно включить его как warning/error для собственного controlled corpus.
-- Используется slide z-order.
-- Finding создаётся только для high-confidence opaque occluder: solid fill с
-  достаточной opacity, JPEG или image без alpha; unknown transparency не
-  считается доказанным occlusion.
-- Evidence: text shape, foreground shape, occluded ratio и opacity basis.
-- Полное пиксельное alpha coverage и renderer-based occlusion deferred.
+- Real-deck calibration disabled this rule by default; users may explicitly
+  enable it as warning/error for their own controlled corpus.
+- Uses slide z-order.
+- Findings require a high-confidence opaque occluder: a solid fill with
+  sufficient opacity, a JPEG, or an image without alpha. Unknown transparency
+  does not establish occlusion.
+- Evidence: text shape, foreground shape, occluded ratio, and opacity basis.
+- Full pixel-level alpha coverage and renderer-based occlusion are deferred.
 
 ### 7.7 `text/min-font-size`
 
-- Effective size разрешается через run/paragraph/list/placeholder inheritance в
-  пределах поддержанного PresentationML style chain.
-- Для title placeholders и body применяется разный configured minimum.
-- Unresolved size не превращается в псевдозначение.
-- Runs под сохранённым `normAutofit@fontScale`, которые уже нарушают minimum,
-  принадлежат специализированному rule ниже и не дублируются.
+- Effective size is resolved through run/paragraph/list/placeholder inheritance
+  within the supported PresentationML style chain.
+- Title placeholders and body text use different configured minimums.
+- Unresolved sizes are not replaced with invented values.
+- Runs under stored `normAutofit@fontScale` that already violate the minimum
+  belong to the specialized rule below and are not duplicated.
 
 ### 7.8 `text/autofit-scale-below-minimum`
 
-- Применяется, только если OOXML содержит валидный сохранённый `fontScale`.
+- Applies only when OOXML contains a valid stored `fontScale`.
 - `effectivePt = resolvedBasePt × fontScale`.
-- Evidence: base size, raw scale, effective size и configured minimum.
-- Не моделирует заново line breaking или font metrics.
+- Evidence: base size, raw scale, effective size, and configured minimum.
+- Does not simulate line breaking or font metrics.
 
 ### 7.9 `text/autofit-enabled`
 
-- Применяется, когда runtime autofit активен, но отсутствует usable persisted
-  scale, позволяющий доказать итоговый размер.
-- Не создаётся дополнительно к `autofit-scale-below-minimum` для того же shape.
-- Message прямо говорит, что итог зависит от installed font metrics/rendering
-  engine.
+- Applies when runtime autofit is active but no usable persisted scale establishes
+  the final size.
+- Does not accompany `autofit-scale-below-minimum` for the same shape.
+- The message explicitly states that the result depends on installed font metrics
+  and the rendering engine.
 
 ### 7.10 `fonts/allowed`
 
-- Rule выключен, пока пользователь не задаст allowlist.
-- Разрешаются explicit typefaces и theme placeholders через reachable theme.
-- Policy применяется отдельно к Latin, East Asian и Complex Script slots.
-- Поведение для unresolved font задаётся option `unresolved`:
+- Disabled until the user configures an allowlist.
+- Resolves explicit typefaces and theme placeholders through the reachable theme.
+- Applies policy separately to Latin, East Asian, and Complex Script slots.
+- The `unresolved` option controls unresolved font behavior:
   `ignore | warning | error`.
-- Проверка локально установленных OS fonts не входит в правило.
+- Does not inspect fonts installed on the local OS.
 
 ## 8. Configuration
 
@@ -312,24 +310,24 @@ baseline может churn-иться. Это явно документирует
 }
 ```
 
-Требования:
+Requirements:
 
-- unknown rule ID или option — config error/code 2;
-- `off`, `warning`, `error` поддерживаются как rule severity;
-- shape pair IDs canonicalized независимо от порядка в config;
-- suppression требует `rule` и хотя бы location selector;
-- `ignore[].file` задаётся raw relative logical path и проходит ту же
-  separator-safe canonical encoding, что CLI `inputKey`, включая external
-  inputs за пределами working directory;
-- `reason` рекомендуется и выводится в suppression summary;
-- CLI override имеет приоритет над config, config — над preset defaults.
+- unknown rule IDs or options produce a config error/code 2;
+- supported rule severities are `off`, `warning`, and `error`;
+- shape pair IDs are canonicalized regardless of their order in config;
+- a suppression requires `rule` and at least one location selector;
+- `ignore[].file` is a raw relative logical path and receives the same
+  separator-safe canonical encoding as the CLI `inputKey`, including external
+  inputs outside the working directory;
+- `reason` is recommended and appears in the suppression summary;
+- CLI overrides take precedence over config; config takes precedence over preset defaults.
 
-Public schema URL определяется только перед публикацией; до этого schema лежит
-в workspace и используется tests/editor fixtures.
+The public schema URL is finalized only before publication; until then, the
+schema lives in the workspace and is used by tests/editor fixtures.
 
 ## 9. Suppression pipeline
 
-Порядок обработки:
+Processing order:
 
 ```text
 raw findings
@@ -340,7 +338,7 @@ raw findings
   → exit policy
 ```
 
-Report содержит counts:
+The report contains counts:
 
 - `new`;
 - `existing`;
@@ -348,9 +346,9 @@ Report содержит counts:
 - `suppressed`;
 - `analysisComplete`.
 
-Suppressed finding не попадает в baseline, но учитывается в suppression summary.
-Неиспользованный suppression показывается отдельным metadata warning, но не
-вводит новый lint rule ID в v0.1.
+Suppressed findings are excluded from the baseline but counted in the suppression
+summary. Unused suppressions appear as separate metadata warnings without
+introducing a new lint rule ID in v0.1.
 
 ## 10. Baseline mode
 
@@ -359,19 +357,19 @@ pptxlint legacy-deck.pptx --write-baseline .pptxlint-baseline.json
 pptxlint legacy-deck.pptx --baseline .pptxlint-baseline.json
 ```
 
-Baseline содержит schema version, tool major version, normalized input key и
-finding fingerprints с минимальной location metadata. Он не содержит file bytes
-или slide text.
+The baseline contains schema version, tool major version, normalized input key,
+and finding fingerprints with minimal location metadata. It contains no file
+bytes or slide text.
 
-При lint:
+During linting:
 
-- fingerprint есть в baseline → `existing`;
-- fingerprint появился впервые → `new`;
-- fingerprint был в baseline и исчез → `resolved`.
+- fingerprint present in the baseline → `existing`;
+- fingerprint appearing for the first time → `new`;
+- fingerprint present in the baseline but now absent → `resolved`.
 
-Только `new` findings участвуют в exit policy. Existing findings отображаются в
-summary и доступны в JSON. Baseline с несовместимой major/schema version
-отклоняется с code 2, а не молча игнорируется.
+Only `new` findings affect exit policy. Existing findings appear in the summary
+and are available in JSON. A baseline with an incompatible major/schema version
+is rejected with code 2 rather than silently ignored.
 
 ## 11. Output formats
 
@@ -394,56 +392,56 @@ legacy-deck.pptx
 
 ### 11.2 JSON
 
-JSON имеет versioned schema и содержит tool/config versions, input hashes и
-findings по status. Opt-in `--debug` добавляет aggregate context/rule timings и
-peak RSS; нестабильные performance measurements не заполняются в default
-output. Абсолютные local paths не выводятся по умолчанию; используются paths
-относительно current working directory.
+JSON uses a versioned schema and contains tool/config versions, input hashes, and
+findings grouped by status. Opt-in `--debug` adds aggregate context/rule timings
+and peak RSS; unstable performance measurements are omitted from default output.
+Absolute local paths are omitted by default; paths relative to the current
+working directory are used.
 
 ### 11.3 SARIF
 
 - SARIF version 2.1.0.
-- Каждый rule публикуется в `tool.driver.rules`.
-- `.pptx` указывается как `artifactLocation`.
-- Slide/shape передаются через `logicalLocations`, message и properties.
-- Fingerprint передаётся как partial fingerprint.
+- Each rule is published in `tool.driver.rules`.
+- The `.pptx` is specified as `artifactLocation`.
+- Slide/shape details are provided through `logicalLocations`, message, and properties.
+- The fingerprint is provided as a partial fingerprint.
 
-Ограничение: PPTX является бинарным artifact, поэтому обычный SARIF не может
-дать line-level annotation или изображение слайда. Visual preview/deep link
-потребует будущего GitHub Check/App и rendering service.
+Limitation: PPTX is a binary artifact, so standard SARIF cannot provide line-level
+annotations or slide images. Visual previews/deep links require a future GitHub
+Check/App and rendering service.
 
-## 12. Performance и security
+## 12. Performance and security
 
-- ZIP entries индексируются один раз; XML parts парсятся лениво и кешируются.
-- External relationships никогда не fetch-ятся.
-- Path traversal, duplicate entry names, DTD/entities и ZIP bombs блокируются.
-- Configurable defaults ограничивают entries, declared/actual uncompressed
-  bytes, XML part size и compression ratio.
-- Benchmark fixture: 50 MiB/100 slides. V0.1 фиксирует измеренные time/peak RSS в
-  CI/dev documentation, не обещая одинаковое wall time на всех машинах.
+- ZIP entries are indexed once; XML parts are parsed lazily and cached.
+- External relationships are never fetched.
+- Path traversal, duplicate entry names, DTD/entities, and ZIP bombs are blocked.
+- Configurable defaults limit entries, declared/actual uncompressed bytes, XML
+  part size, and compression ratio.
+- Benchmark fixture: 50 MiB/100 slides. V0.1 records measured time/peak RSS in
+  CI/developer documentation without promising identical wall time on every machine.
 
 ## 13. Acceptance criteria
 
-- `npx pptxlint generated.pptx` или эквивалентная packed CLI-команда работает на
-  clean install и возвращает code 0/1/2 по контракту.
-- Все десять rules имеют positive, negative и malformed-prerequisite fixtures.
-- Missing media не дублируется как broken relationship.
-- Autofit rules не выдают вычисленный размер без persisted scale.
-- Intentional overlap подавляется точным config suppression.
-- Baseline различает new/existing/resolved и ломает CI только на новых gating
+- `npx pptxlint generated.pptx` or an equivalent packed CLI command works on a
+  clean install and returns code 0/1/2 according to the contract.
+- All ten rules have positive, negative, and malformed-prerequisite fixtures.
+- Missing media is not duplicated as a broken relationship.
+- Autofit rules do not report a computed size without a persisted scale.
+- Intentional overlap is suppressed by an exact config suppression.
+- Baseline distinguishes new/existing/resolved and fails CI only for new gating
   findings.
-- Stylish, JSON и SARIF outputs проходят snapshot/schema tests.
-- Findings и fingerprints детерминированы.
-- Core/CLI работают без PowerPoint, LibreOffice, network и system-font scan.
-- Tests, lint, typecheck, build и packed-package smoke проходят в CI.
+- Stylish, JSON, and SARIF outputs pass snapshot/schema tests.
+- Findings and fingerprints are deterministic.
+- Core/CLI work without PowerPoint, LibreOffice, network, or system-font scanning.
+- Tests, lint, typecheck, build, and packed-package smoke pass in CI.
 
-## 14. После v0.1
+## 14. After v0.1
 
-Приоритет определяется реальными deck fixtures и usage, а не количеством rules:
+Priorities are determined by real deck fixtures and usage rather than rule count:
 
-1. GitHub Action/Check с удобными PR summaries;
-2. safe `--fix` для строго доказуемых изменений;
-3. optional rendering и slide thumbnails;
+1. GitHub Action/Check with convenient PR summaries;
+2. safe `--fix` for strictly provable changes;
+3. optional rendering and slide thumbnails;
 4. visual baseline/diff;
-5. organization policies и hosted history;
-6. REST API/web dashboard как часть платной инфраструктуры.
+5. organization policies and hosted history;
+6. REST API/web dashboard as part of paid infrastructure.
