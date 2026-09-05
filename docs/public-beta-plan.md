@@ -248,6 +248,11 @@ Fixture intake requires sanitization, an explicit retention/use decision, and a
 minimal reproduction where possible. Proprietary customer decks are not added
 to the repository by default.
 
+When engineering resumes, it starts with the mandatory
+[deferred release-hardening checklist](releasing.md#7-deferred-hardening-before-the-next-release)
+before any feature work or new release tag. The checklist is not a reason to
+interrupt assisted adoption while `v0.1.2` remains operational.
+
 ## 8. v0.2 decision gate
 
 No v0.2 implementation starts during the experiment. A direction becomes a

@@ -182,3 +182,33 @@ registry-smoke result, and final dist-tags in
 [release-evidence.md](release-evidence.md). Stable release is complete only
 when `latest` is `0.1.2`, `next` remains the beta, and both Node.js registry
 smokes pass.
+
+## 7. Deferred hardening before the next release
+
+These items are non-blocking for `v0.1.2` and remain deliberately deferred
+during the assisted-adoption experiment. They are the first engineering tasks
+when development resumes and must be completed before creating another release
+tag:
+
+1. **Bound registry propagation waits.** Update `registry-smoke.mjs` to retry
+   exact-version visibility for both `@pptxlint/core` and `pptxlint` before
+   installation. Retry only expected propagation failures such as `E404` and
+   `ETARGET`, use fresh registry lookups with bounded backoff, and stop after a
+   documented maximum of five minutes with the last error preserved. Other
+   registry or authentication failures must fail immediately.
+2. **Assert the complete publish command set.** Strengthen
+   `assert-release.mjs` to enumerate executable `npm publish` invocations in
+   the OIDC job and require exactly two: core first and CLI second, both using
+   explicit `./release/*.tgz` local paths, public access, and the `latest`
+   dist-tag. An extra command, a missing command, a bare `release/` path, or a
+   matching string present only in a comment must fail the assertion.
+3. **Disambiguate registry timestamps.** Rename the stable evidence table
+   column from `Registry publication (UTC)` to
+   `npm registry time metadata (UTC)` and keep the explanation that asynchronous
+   package processing can make core visible after the later-submitted CLI. The
+   timestamps must not be presented as command execution order.
+
+Completion requires focused regression coverage for the retry terminal cases
+and publish-command enumeration, plus format, lint, release assertions, and a
+dry-run registry-smoke test. These tasks do not authorize new lint rules, UI,
+repair, or rendering work.
